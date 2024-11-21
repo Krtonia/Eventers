@@ -1,258 +1,253 @@
 package com.example.eventer.ui
 
 import android.annotation.SuppressLint
-import android.provider.ContactsContract.Profile
-import androidx.compose.material3.Icon
+import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign.Companion.Center
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.ActivityNavigator
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
-import com.Routes
-import com.example.eventer.NavItem
+import androidx.navigation.compose.currentBackStackEntryAsState
+import coil.compose.rememberAsyncImagePainter
 import com.example.eventer.R
+import com.Routes
 import com.example.eventer.ui.theme.firasans
-import kotlinx.coroutines.selects.select
-
+import android.Manifest
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun Home(navController: NavController) {
-
-     /*val nl = listOf(
-        NavItem("Home", Icons.Default.Home),
-        NavItem("Profile", Icons.Default.Person),
-        NavItem("Options", Icons.Default.List)
-    )*/
-
-    /*var selindex by remember { mutableStateOf(0)}
-
-    when(selindex){
-        0 -> Home(navController)
-        1 -> Profile(navController)
-        2 -> Options(navController)
-    }*/
-
-    //var selindex by remember { mutableStateOf(false)}
+    var cardCount by remember { mutableStateOf(0) }
+    var showDialog by remember { mutableStateOf(false) }
+    val cardList = remember { mutableStateListOf<String>() }
 
     Scaffold(
-        bottomBar = {
-                NavigationBar() {
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = { navController.navigate(Routes.third) }, icon = {
-                            Icon(
-                                imageVector = Icons.Default.Home,
-                                contentDescription = "Home"
-                            )
-                        },
-                        label = { Text(text = "Home") })
-
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = { navController.navigate(Routes.fourth) }, icon = {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = "Profile"
-                            )
-                        },
-                        label = { Text(text = "Profile") })
-
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = { navController.navigate(Routes.fifth) }, icon = {
-                            Icon(
-                                imageVector = Icons.Default.List,
-                                contentDescription = "Options"
-                            )
-                        },
-                        label = { Text(text = "Options") })
-                }
-            },
-        topBar = { Topapp() },
-        floatingActionButton = { But() },
-    ) { innerPadding ->
-        Cad(modifier = Modifier.padding(top = 40.dp))
+        bottomBar = { BottomNavigationBar(navController) },
+        topBar = { TopAppBarContent() },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { showDialog = true }) {
+                Icon(Icons.Default.Add, contentDescription = "Add")
+            }
+        },
+    ) {
+        // Passing cardList and cardCount to Card composable
+        Card(cardList = cardList)
+        if (showDialog) {
+            EventDialog(
+                onDismiss = { showDialog = false },
+                onConfirm = { cardCount++;cardList.add("Card $cardCount") }
+            )
+        }
     }
 }
 
 @Composable
-fun But() {
-    FloatingActionButton(onClick = { }) {
-        Icon(Icons.Default.Add, contentDescription = "Add")
+fun BottomNavigationBar(navController: NavController) {
+    NavigationBar(containerColor = (Color(0xFFF2F1F6))) {
+        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+        NavigationBarItem(
+            selected = currentRoute == Routes.third,
+            colors = NavigationBarItemDefaults.colors(Color(0xFF0047AB)),
+            onClick = { navController.navigate(Routes.third) },
+            icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "Home") },
+            label = { Text(text = "Home") }
+        )
+        NavigationBarItem(
+            selected = currentRoute == Routes.fourth,
+            colors = NavigationBarItemDefaults.colors(Color(0xFF0047AB)),
+            onClick = { navController.navigate(Routes.fourth) },
+            icon = { Icon(imageVector = Icons.Default.Person, contentDescription = "Profile") },
+            label = { Text(text = "Profile") }
+        )
+        NavigationBarItem(
+            selected = currentRoute == Routes.fifth,
+            colors = NavigationBarItemDefaults.colors(Color(0xFF0047AB)),
+            onClick = { navController.navigate(Routes.fifth) },
+            icon = { Icon(imageVector = Icons.Default.List, contentDescription = "Options") },
+            label = { Text(text = "Options") }
+        )
     }
 }
-
-/*@Composable
-fun Bot() {
-    var selt by remember { mutableStateOf(0) }
-    NavigationBar(modifier = Modifier.height(120.dp)) {
-        nl.forEachIndexed() { index, navItem ->
-            NavigationBarItem(
-                selected = selt == index,
-                onClick = {  },
-                icon = { Icon(imageVector = navItem.icon, contentDescription = "null") },
-                label = {
-                    Text(text = navItem.label)
-                })
-        }
-    }
-     BottomAppBar(modifier = Modifier.height(110.dp), content = {
-         Row(
-             modifier = Modifier.fillMaxWidth(1f),
-             horizontalArrangement = Arrangement.SpaceEvenly,
-             verticalAlignment = Alignment.CenterVertically
-         ) {
-             //Text(text = "Laude")
-
-             // Home Button
-             IconButton(onClick = { /*TODO*/ }) {
-                 Icon(Icons.Default.Home, contentDescription = "Home")
-             }
-             Spacer(modifier = Modifier.width(2.dp))
-             // Options Button
-             IconButton(onClick = { /*TODO*/ }) {
-                 Icon(Icons.Default.List, contentDescription = "Options")
-             }
-             Spacer(modifier = Modifier.width(2.dp))
-             // Profile Button
-             IconButton(onClick = { /*TODO*/ }) {
-                 Icon(Icons.Default.Person, contentDescription = "Profile")
-             }
-         }
-     })
-}*/
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Topapp() {
-    TopAppBar(modifier = Modifier
-        .height(110.dp)
-        .padding(),
+fun TopAppBarContent() {
+    TopAppBar(
+        modifier = Modifier
+            .height(110.dp)
+            .padding(),
         title = {
             Text(
                 text = "Welcome",
-                fontSize = 38.sp,
+                fontSize = 42.sp,
                 fontFamily = firasans,
                 fontWeight = FontWeight.SemiBold
             )
-        })
-    Spacer(modifier = Modifier.height(25.dp))
+        }
+    )
 }
 
 @Composable
-fun Cad(modifier: Modifier) {
+fun EventDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(onClick = onConfirm) { Text(text = "Add") }
+        },
+        title = {
+            Text(
+                text = "Create an Event",
+                modifier = Modifier.padding(5.dp),
+                fontFamily = firasans,
+                fontWeight = FontWeight.SemiBold
+            )
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) { Text(text = "Cancel") }
+        }
+    )
+}
 
+/*@Composable
+fun ContentCards() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Spacer(modifier = Modifier.height(5.dp))
-        ElevatedCard(
-            onClick = { /*TODO*/ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 70.dp)
-                .height(200.dp)
-        ) {
-            Image(
-                modifier = Modifier,
-                contentScale = ContentScale.FillBounds,
-                painter = painterResource(id = R.drawable.party),
-                contentDescription = "Home page Image"
+        repeat(3) {
+            ElevatedCard(
+                onClick = { /* TODO: Card action */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 30.dp)
+                    .height(200.dp)
+            ) {
+                Image(
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillBounds,
+                    painter = painterResource(id = R.drawable.party),
+                    contentDescription = "Home page Image"
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "''Text Here''",
+                fontSize = 22.sp,
+                textAlign = TextAlign.Center,
+                fontStyle = FontStyle.Italic
             )
         }
+    }
+}*/
 
-        Spacer(modifier = Modifier.height(10.dp))
+@Composable
+fun Card(cardList: List<String>) {
+    Column(
+        modifier = Modifier
+            .padding(top = 76.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Spacer(modifier = Modifier.height(9.dp))
 
-        Text(
-            text = "''Text Here''",
-            fontSize = 22.sp,
-            textAlign = Center,
-            fontStyle = FontStyle.Italic
-        )
-
-        ElevatedCard(
-            onClick = { /*TODO*/ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 30.dp)
-                .height(200.dp)
-        ) {
-            Image(
-                modifier = Modifier,
-                contentScale = ContentScale.FillBounds,
-                painter = painterResource(id = R.drawable.party),
-                contentDescription = "Home page Image"
-            )
+        // Display the list of cards
+        LazyColumn {
+            items(cardList) {
+                ElevatedCard(
+                    onClick = { /* TODO: Card action */ },
+                    modifier = Modifier
+                        .padding(top = 20.dp)
+                        .fillMaxWidth()
+                        .padding(vertical = 10.dp)
+                        .height(200.dp),
+                    elevation = CardDefaults.cardElevation(5.dp),
+                    shape = RoundedCornerShape(22.dp)
+                ) {
+                    Image(
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.FillBounds,
+                        painter = painterResource(id = R.drawable.party),
+                        contentDescription = "Home page Image"
+                    )
+                    Text(text = "cardText", fontSize = 24.sp, color = Color.Black)
+                    Text(text = "This is a dynamically added card.", fontSize = 16.sp)
+                }
+            }
         }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Text(
-            text = "''Text Here''",
-            fontSize = 22.sp,
-            textAlign = Center,
-            fontStyle = FontStyle.Italic
-        )
-
-        ElevatedCard(
-            onClick = { /*TODO*/ },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 30.dp)
-                .height(200.dp)
-        ) {
-            Image(
-                modifier = Modifier,
-                contentScale = ContentScale.FillBounds,
-                painter = painterResource(id = R.drawable.party),
-                contentDescription = "Home page Image"
-            )
-        }
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Text(
-            text = "''Text Here''",
-            fontSize = 22.sp,
-            textAlign = Center,
-            fontStyle = FontStyle.Italic
-        )
-
     }
 }
+
+/*@Composable
+fun Star()
+{
+
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+
+    // Launch the image picker
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageUri = uri
+    }
+
+    // Permission launcher for Android 13+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) imagePickerLauncher.launch("image/*")
+    }
+
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Button(onClick = {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            } else {
+                imagePickerLauncher.launch("image/*")
+            }
+        }) {
+            Text("Pick an Image")
+        }
+
+        imageUri?.let { uri ->
+            val painter = rememberAsyncImagePainter(uri)
+            Image(
+                painter = painter,
+                contentDescription = "Selected Image",
+                modifier = Modifier.size(200.dp)
+            )
+        }
+    }
+}*/
