@@ -42,7 +42,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
     kapt {
         correctErrorTypes = true
@@ -65,9 +65,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.coil.compose.v240)
     implementation (libs.androidx.constraintlayout.compose)
-    implementation (libs.coil.compose.v240)
     implementation (libs.androidx.camera.camera2)
     implementation (libs.androidx.camera.lifecycle)
     implementation (libs.camera.view)
@@ -89,6 +87,12 @@ dependencies {
 
     //Security
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+
+    //lifecycle compose
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
 
     //Retrofit && Gson
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
@@ -96,4 +100,6 @@ dependencies {
 
     //OkHttp
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    kapt("androidx.lifecycle:lifecycle-compiler:2.8.7")
 }

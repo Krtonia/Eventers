@@ -40,9 +40,9 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
@@ -259,8 +259,6 @@ fun QRScanner(
         )
     }
 
-    var permissionRequested by remember { mutableStateOf(false) }
-
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -268,8 +266,7 @@ fun QRScanner(
     }
 
     LaunchedEffect(Unit) {
-        if (!permissionRequested) {
-            permissionRequested = true
+        if (!hasCameraPermission) {
             launcher.launch(android.Manifest.permission.CAMERA)
         }
     }
@@ -279,9 +276,11 @@ fun QRScanner(
             onDismissRequest = onDismiss,
             confirmButton = {
                 Button(
-                    modifier = Modifier.padding(14.dp), colors = ButtonDefaults.buttonColors(
+                    modifier = Modifier.padding(14.dp),
+                    colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF82C8E5)
-                    ), onClick = onDismiss
+                    ),
+                    onClick = onDismiss
                 ) {
                     Text(text = "Close", color = Color.Black)
                 }
@@ -290,7 +289,6 @@ fun QRScanner(
                 Box(
                     modifier = Modifier
                         .size(300.dp)
-                        .fillMaxWidth()
                 ) {
                     AndroidView(
                         factory = { context ->
@@ -321,11 +319,9 @@ fun QRScanner(
                                     )
                                     scanner.process(image)
                                         .addOnSuccessListener { barcodes ->
-                                            for (barcode in barcodes) {
-                                                barcode.rawValue?.let { qrContent ->
-                                                    onQRCodeScanned(qrContent)
-                                                    onDismiss()
-                                                }
+                                            barcodes.firstOrNull()?.rawValue?.let { qrContent ->
+                                                onQRCodeScanned(qrContent)
+                                                onDismiss()
                                             }
                                         }
                                         .addOnCompleteListener {
@@ -335,15 +331,18 @@ fun QRScanner(
                                     imageProxy.close()
                                 }
                             }
+
                             try {
-                                val cameraProvider = cameraProviderFuture.get()
-                                cameraProvider.unbindAll()
-                                cameraProvider.bindToLifecycle(
-                                    lifecycleOwner,
-                                    CameraSelector.DEFAULT_BACK_CAMERA,
-                                    preview,
-                                    imageAnalysis
-                                )
+                                cameraProviderFuture.addListener({
+                                    val cameraProvider = cameraProviderFuture.get()
+                                    cameraProvider.unbindAll()
+                                    cameraProvider.bindToLifecycle(
+                                        lifecycleOwner,
+                                        CameraSelector.DEFAULT_BACK_CAMERA,
+                                        preview,
+                                        imageAnalysis
+                                    )
+                                }, ContextCompat.getMainExecutor(context))
                             } catch (e: Exception) {
                                 e.printStackTrace()
                             }
@@ -355,22 +354,3 @@ fun QRScanner(
         )
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

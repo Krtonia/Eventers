@@ -7,7 +7,9 @@ import androidx.activity.enableEdgeToEdge
 import com.io.eventer.navigation.Navigation
 import com.io.eventer.ui.theme.EventerTheme
 import com.example.eventer.R
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
