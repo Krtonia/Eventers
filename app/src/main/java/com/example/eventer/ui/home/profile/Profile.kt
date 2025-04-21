@@ -1,4 +1,4 @@
-package com.example.eventer.ui
+package com.example.eventer.ui.home.profile
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -11,7 +11,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -28,9 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -39,13 +36,12 @@ import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.rememberAsyncImagePainter
-import com.Routes
+import com.example.eventer.navigation.Routes
 import com.example.eventer.R
 import com.example.eventer.ui.theme.firasans
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-import android.content.Context
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -114,8 +110,8 @@ fun Het(onImageSelected: (Uri) -> Unit,navController: NavController) {
     val context = LocalContext.current
 
     val gc = listOf(
-        Color(0xFF252525),
-        Color(0xFFBE5103)
+        Color(0xFF000000),
+        Color(0xFF560591)
     )
 
     fun createImageFile(): File {
@@ -214,9 +210,9 @@ fun Het(onImageSelected: (Uri) -> Unit,navController: NavController) {
     }
 
     Text(
-        modifier = Modifier.padding(top = 275.dp, start = 50.dp),
+        modifier = Modifier.padding(top = 275.dp, start = 28.dp),
         text = "Hello! What Brings You here?",
-        fontSize = 25.sp,
+        fontSize = 29.sp,
         fontFamily = firasans,
         fontWeight = FontWeight.Medium,
         color = Color.Black

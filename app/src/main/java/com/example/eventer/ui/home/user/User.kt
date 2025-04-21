@@ -1,4 +1,4 @@
-package com.example.eventer.ui
+package com.example.eventer.ui.home.user
 
 import android.annotation.SuppressLint
 import android.widget.Toast
@@ -30,10 +30,11 @@ import com.example.eventer.ui.theme.firasans
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun User(navController: NavController) {
+
     Box(modifier = Modifier.fillMaxSize()) {
         // Background Image
         Image(
-            painter = painterResource(id = R.drawable.download),
+            painter = painterResource(id = R.drawable.back),
             contentDescription = "Background",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
@@ -234,7 +235,7 @@ fun UserInfoTextField(
     textValue: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     errorMessage: String? = null,
-    modifier: Modifier = Modifier
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         Text(

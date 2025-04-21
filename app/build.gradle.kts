@@ -51,8 +51,6 @@ android {
 
 dependencies {
 
-    val nav = "2.8.3"
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -65,6 +63,11 @@ dependencies {
     implementation(libs.coil.compose.v240)
     implementation (libs.androidx.constraintlayout.compose)
     implementation (libs.coil.compose.v240)
+    implementation (libs.androidx.camera.camera2)
+    implementation (libs.androidx.camera.lifecycle)
+    implementation (libs.camera.view)
+    implementation (libs.barcode.scanning)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -74,4 +77,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    //Material
+    implementation(libs.androidx.material)
 }

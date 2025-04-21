@@ -1,4 +1,4 @@
-package com
+package com.example.eventer.navigation
 
 object Routes
 {
