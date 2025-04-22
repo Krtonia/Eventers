@@ -1,8 +1,10 @@
 package com.io.eventer.ui.home.user
 
 import android.annotation.SuppressLint
+import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,14 +34,6 @@ import com.example.eventer.R
 fun User(navController: NavController) {
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Background Image
-        Image(
-            painter = painterResource(id = R.drawable.back),
-            contentDescription = "Background",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
@@ -51,12 +45,8 @@ fun User(navController: NavController) {
                             fontSize = 32.sp,
                             fontFamily = firasans,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color.White
                         )
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
-                    )
                 )
             }
         ) { innerPadding ->
@@ -94,7 +84,6 @@ fun UserContent(navController: NavController) {
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.Start
     ) {
-        // Info Row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -115,36 +104,34 @@ fun UserContent(navController: NavController) {
             )
         }
 
-        // User Name TextField
         UserInfoTextField(
             label = "User Name",
-            labelColor = Color.White,
             textValue = userName,
             onValueChange = {
                 userName = it
                 userNameError = validateUsername(it.text)
             },
             errorMessage = userNameError,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 16.dp),
+            labelColor = if (isSystemInDarkTheme()) Color.White else Color.Black
         )
-
-        // Name TextField
         UserInfoTextField(
             label = "Name",
-            labelColor = Color.White,
+
             textValue = name,
             onValueChange = {
                 name = it
                 nameError = validateName(it.text)
             },
             errorMessage = nameError,
+            labelColor = if (isSystemInDarkTheme()) Color.White else Color.Black,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
         // Surname TextField
         UserInfoTextField(
             label = "Surname",
-            labelColor = Color.White,
+            labelColor = if (isSystemInDarkTheme()) Color.White else Color.Black,
             textValue = surname,
             onValueChange = {
                 surname = it
@@ -157,7 +144,7 @@ fun UserContent(navController: NavController) {
         // Email TextField
         UserInfoTextField(
             label = "Email",
-            labelColor = Color.White,
+            labelColor = if (isSystemInDarkTheme()) Color.White else Color.Black,
             textValue = email,
             onValueChange = {
                 email = it
@@ -313,7 +300,7 @@ fun validateSurname(surname: String): String? {
 fun validateEmail(email: String): String? {
     return when {
         email.isBlank() -> "Email cannot be empty"
-        !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Invalid email format"
+        !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Invalid email format"
         email.length > 100 -> "Email cannot exceed 100 characters"
         else -> null
     }

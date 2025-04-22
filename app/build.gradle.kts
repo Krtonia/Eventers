@@ -101,5 +101,6 @@ dependencies {
     //OkHttp
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
+    //Kapt
     kapt("androidx.lifecycle:lifecycle-compiler:2.8.7")
 }

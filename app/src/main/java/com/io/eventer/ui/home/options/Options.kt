@@ -3,8 +3,12 @@ package com.io.eventer.ui.home.options
 import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -18,7 +22,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.Card
@@ -27,31 +30,28 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.example.eventer.R
 import com.io.eventer.navigation.Routes
 import com.io.eventer.ui.theme.firasans
+import androidx.core.net.toUri
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Options(navController: NavController) {
-
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier
-                    .height(110.dp)
-                    .padding(),
                 title = {
                     Text(
                         text = "Options",
@@ -68,7 +68,6 @@ fun Options(navController: NavController) {
                     navController.currentBackStackEntryAsState().value?.destination?.route
                 NavigationBarItem(
                     selected = currentRoute == Routes.fourth,
-                    colors = NavigationBarItemDefaults.colors(Color(0xFF0047AB)),
                     onClick = { navController.navigate(Routes.fourth) },
                     icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "Home") },
                     label = { Text(text = "Home") }
@@ -76,7 +75,6 @@ fun Options(navController: NavController) {
 
                 NavigationBarItem(
                     selected = currentRoute == Routes.fifth,
-                    colors = NavigationBarItemDefaults.colors(Color(0xFF0047AB)),
                     onClick = { navController.navigate(Routes.fifth) },
                     icon = {
                         Icon(
@@ -89,7 +87,6 @@ fun Options(navController: NavController) {
 
                 NavigationBarItem(
                     selected = currentRoute == Routes.sixth,
-                    colors = NavigationBarItemDefaults.colors(Color(0xFF0047AB)),
                     onClick = { navController.navigate(Routes.sixth) },
                     icon = {
                         Icon(
@@ -101,194 +98,119 @@ fun Options(navController: NavController) {
                 )
             }
         },
-    ) {
-        Sed(navController)
-    }
+        content = { paddingValues ->
+            // Apply the padding values from Scaffold
+            Box(modifier = Modifier.padding(paddingValues)) {
+                Sed(navController)
+            }
+        }
+    )
 }
 
 @Composable
 fun Sed(navController: NavController) {
-
     val context = LocalContext.current
 
-    Card(
-        onClick = {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp) // Add some padding around the edges
+    ) {
+        // First Row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp), // Add top padding to account for app bar
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            // Calendar Card
+            OptionCard(
+                modifier = Modifier.weight(1f),
+                imageRes = R.drawable.calender,
+                text = "",
+                onClick = {
+                    val googleCalendarPackage = "com.google.android.calendar"
+                    val intent =
+                        context.packageManager.getLaunchIntentForPackage(googleCalendarPackage)
 
-            val googleCalendarPackage = "com.google.android.calendar"
-            val intent = context.packageManager.getLaunchIntentForPackage(googleCalendarPackage)
-
-            if (intent != null) {
-                // Calendar app is installed
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                context.startActivity(intent)
-            } else {
-                // Calendar app not installed, open in browser
-                val browserIntent = Intent(Intent.ACTION_VIEW).apply {
-                    data = android.net.Uri.parse("https://calendar.google.com")
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    if (intent != null) {
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        context.startActivity(intent)
+                    } else {
+                        val browserIntent = Intent(Intent.ACTION_VIEW).apply {
+                            data = "https://calendar.google.com".toUri()
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(browserIntent)
+                    }
                 }
-                context.startActivity(browserIntent)
-            }
-        },
-        modifier = Modifier.padding(top = 140.dp),
-        shape = RoundedCornerShape(14.dp),
-        elevation = CardDefaults.cardElevation(20.dp)
-    ) {
-        Box(
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Logout Card
+            OptionCard(
+                modifier = Modifier.weight(1f),
+                imageRes = R.drawable.logout,
+                text = "",
+                onClick = { /* TODO: Handle logout */ }
+            )
+        }
+
+        // Second Row
+        Row(
             modifier = Modifier
-                .height(200.dp)
-                .width(200.dp)
+                .fillMaxWidth()
+                .padding(top = 232.dp), // 200 (card height) + 32 (spacing)
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Image(
-                modifier = Modifier.padding(start = 10.dp),
-                painter = painterResource(id = R.drawable.calender),
-                contentScale = ContentScale.Crop,
-                contentDescription = "Calendar"
+            // Help Card
+            OptionCard(
+                modifier = Modifier.weight(1f),
+                imageRes = R.drawable.help,
+                text = "",
+                onClick = { navController.navigate(Routes.seventh) }
             )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(1.dp),
-                contentAlignment = Alignment.BottomCenter
-            )
-            {
-                Text(
-                    text = "Calendar",
-                    style = TextStyle(
-                        color = Color.Black,
-                        fontSize = 28.sp,
-                        fontFamily = firasans,
-                        fontWeight = FontWeight.Medium
-                    )
-                )
-            }
+            Spacer(modifier = Modifier.width(16.dp))
 
+            // About Card
+            OptionCard(
+                modifier = Modifier.weight(1f),
+                imageRes = R.drawable.info,
+                text = "",
+                onClick = { navController.navigate(Routes.sixth) }
+            )
         }
     }
+}
 
+@Composable
+fun OptionCard(
+    modifier: Modifier = Modifier,
+    imageRes: Int,
+    text: String,
+    onClick: () -> Unit
+) {
     Card(
-        onClick = { /* TODO: Card action */ },
-        //modifier=Modifier.fillMaxSize(),
-        modifier = Modifier
-            .padding(top = 140.dp)
-            .padding(start = 220.dp),
+        onClick = onClick,
+        modifier = modifier,
         shape = RoundedCornerShape(14.dp),
-        elevation = CardDefaults.cardElevation(20.dp)
+        elevation = CardDefaults.cardElevation(8.dp)
     ) {
         Box(
             modifier = Modifier
                 .height(200.dp)
-                .width(200.dp)
+                .fillMaxWidth()
         ) {
             Image(
-                modifier = Modifier.padding(start = 30.dp),
-                painter = painterResource(id = R.drawable.logout),
-                contentScale = ContentScale.Crop,
-                contentDescription = "Log Out"
-            )
-
-            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(1.dp),
-                contentAlignment = Alignment.BottomCenter
+                    .padding(16.dp),
+                painter = painterResource(id = imageRes),
+                contentScale = ContentScale.Fit,
+                contentDescription = text
             )
-            {
-                Text(
-                    text = "Log Out",
-                    style = TextStyle(
-                        color = Color.Black,
-                        fontSize = 28.sp,
-                        fontFamily = firasans,
-                        fontWeight = FontWeight.Medium
-                    )
-                )
-            }
-
-        }
-    }
-
-    Card(
-        onClick = { navController.navigate(Routes.seventh) },
-        //modifier=Modifier.fillMaxSize(),
-        modifier = Modifier
-            .padding(top = 130.dp)
-            .padding(top = 250.dp),
-        shape = RoundedCornerShape(14.dp),
-        elevation = CardDefaults.cardElevation(20.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .height(200.dp)
-                .width(200.dp)
-        ) {
-            Image(
-                modifier = Modifier.padding(start = 10.dp),
-                painter = painterResource(id = R.drawable.help),
-                contentScale = ContentScale.Crop,
-                contentDescription = "Help"
-            )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(0.dp),
-                contentAlignment = Alignment.BottomCenter
-            )
-            {
-                Text(
-                    text = "Help",
-                    style = TextStyle(
-                        color = Color.Black,
-                        fontSize = 28.sp,
-                        fontFamily = firasans,
-                        fontWeight = FontWeight.Medium
-                    )
-                )
-            }
-
-        }
-    }
-
-    Card(
-        onClick = { navController.navigate(Routes.sixth) },
-        modifier = Modifier
-            .padding(top = 380.dp)
-            .padding(start = 220.dp),
-        shape = RoundedCornerShape(14.dp),
-        elevation = CardDefaults.cardElevation(20.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .height(200.dp)
-                .width(200.dp)
-        ) {
-            Image(
-                modifier = Modifier.padding(start = 10.dp),
-                painter = painterResource(id = R.drawable.info),
-                contentScale = ContentScale.Crop,
-                contentDescription = "About"
-            )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(1.dp),
-                contentAlignment = Alignment.BottomCenter
-            )
-            {
-                Text(
-                    text = "About us",
-                    style = TextStyle(
-                        color = Color.Black,
-                        fontSize = 28.sp,
-                        fontFamily = firasans,
-                        fontWeight = FontWeight.Medium
-                    )
-                )
-            }
-
         }
     }
 }
@@ -299,7 +221,8 @@ fun Help(navController: NavController) {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Button(modifier = Modifier.padding(top = 100.dp),
+        Button(
+            modifier = Modifier.padding(top = 100.dp),
             onClick = { /*TODO*/ }) {
             Text(
                 text = "Support",
@@ -316,16 +239,8 @@ fun Help(navController: NavController) {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+@Preview(showBackground = true, showSystemUi = true, device = "id:pixel_6_pro")
+@Composable
+fun OptionsPreview() {
+    Options(navController = rememberNavController())
+}

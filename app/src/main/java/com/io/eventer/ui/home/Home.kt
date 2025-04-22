@@ -35,6 +35,8 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.Button
@@ -59,15 +61,14 @@ fun Home(navController: NavController) {
         bottomBar = { BottomNavigationBar(navController) },
         topBar = { TopAppBarContent() },
         floatingActionButton = {
-            ExtendedFloatingActionButton(elevation = FloatingActionButtonDefaults.elevation(12.dp),
-                containerColor = Color(0xFF82C8E5),
+            ExtendedFloatingActionButton(
+                elevation = FloatingActionButtonDefaults.elevation(12.dp),
                 onClick = { showDialog = true }) {
                 Icon(Icons.Filled.Add, contentDescription = "Add")
                 Text(
                     fontSize = 17.sp,
                     modifier = Modifier.padding(start = 5.dp),
                     text = "New",
-                    color = Color.Black,
                     fontFamily = firasans,
                     fontWeight = FontWeight.Medium
                 )
@@ -85,20 +86,20 @@ fun Home(navController: NavController) {
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
-    NavigationBar(containerColor = (Color(0xFFF2F1F6))) {
+    NavigationBar() {
         val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-        NavigationBarItem(selected = currentRoute == Routes.fourth,
-            colors = NavigationBarItemDefaults.colors(Color(0xFF0047AB)),
+        NavigationBarItem(
+            selected = currentRoute == Routes.fourth,
             onClick = { navController.navigate(Routes.fourth) },
             icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "Home") },
             label = { Text(text = "Home") })
-        NavigationBarItem(selected = currentRoute == Routes.fifth,
-            colors = NavigationBarItemDefaults.colors(Color(0xFF0047AB)),
+        NavigationBarItem(
+            selected = currentRoute == Routes.fifth,
             onClick = { navController.navigate(Routes.fifth) },
             icon = { Icon(imageVector = Icons.Default.Person, contentDescription = "Profile") },
             label = { Text(text = "Profile") })
-        NavigationBarItem(selected = currentRoute == Routes.sixth,
-            colors = NavigationBarItemDefaults.colors(Color(0xFF0047AB)),
+        NavigationBarItem(
+            selected = currentRoute == Routes.sixth,
             onClick = { navController.navigate(Routes.sixth) },
             icon = {
                 Icon(
@@ -116,9 +117,6 @@ fun TopAppBarContent() {
     var showQRScanner by remember { mutableStateOf(false) }
 
     TopAppBar(
-        modifier = Modifier
-            .height(110.dp)
-            .padding(),
         title = {
             Text(
                 text = "Welcome",
@@ -126,22 +124,22 @@ fun TopAppBarContent() {
                 fontFamily = firasans,
                 fontWeight = FontWeight.SemiBold
             )
-        }
-    )
-
-    Image(
-        modifier = Modifier
-            .padding(start = 380.dp, top = 61.dp)
-            .size(33.dp)
-            .clickable { showQRScanner = true },
-        painter = painterResource(id = R.drawable.qr),
-        contentDescription = "QR scanner"
-    )
+        }, actions = {
+            IconButton(onClick = { showQRScanner = true }) {
+                Icon(
+                    painter = painterResource(R.drawable.qr),
+                    tint = if (isSystemInDarkTheme()) Color.White else Color.Black,
+                    modifier = Modifier
+                        .size(30.dp)
+                        .padding(top = 6.dp),
+                    contentDescription = "QR Scanner"
+                )
+            }
+        })
 
     if (showQRScanner) {
         QRScanner(
             onQRCodeScanned = { qrContent ->
-                // Handle the scanned QR code content here
                 println("You're Scanned QR Code: $qrContent")
             },
             onDismiss = { showQRScanner = false }
@@ -155,15 +153,13 @@ fun EventDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     var eventText by remember { mutableStateOf("") }
 
     AlertDialog(onDismissRequest = onDismiss, confirmButton = {
-        Button(colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF82C8E5)
-        ), onClick = {
+        Button(onClick = {
             if (eventText.isNotBlank()) {
                 onConfirm(eventText)
                 onDismiss()
             }
         }) {
-            Text(text = "Add", color = Color.Black)
+            Text(text = "Add")
         }
     }, title = {
         Text(
@@ -181,11 +177,8 @@ fun EventDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
             modifier = Modifier.fillMaxWidth()
         )
     }, dismissButton = {
-        Button(
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF82C8E5)
-            ), onClick = onDismiss
-        ) { Text(text = "Cancel", color = Color.Black) }
+        Button(onClick = onDismiss
+        ) { Text(text = "Cancel") }
     })
 }
 
@@ -227,7 +220,6 @@ fun Card(cardList: List<String>) {
                             Text(
                                 text = cardText,
                                 fontSize = 22.sp,
-                                color = Color.Black,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }

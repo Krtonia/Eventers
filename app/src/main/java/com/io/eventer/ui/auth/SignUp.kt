@@ -62,7 +62,7 @@ fun SignUp(navController: NavController) {
             painter = painterResource(R.drawable.background),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds
+            contentScale = ContentScale.Crop
         )
     }
 
