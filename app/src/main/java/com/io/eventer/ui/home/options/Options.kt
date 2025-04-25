@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.eventer.R
+import com.io.eventer.R
 import com.io.eventer.navigation.Routes
 import com.io.eventer.ui.theme.firasans
 import androidx.core.net.toUri
@@ -237,10 +237,4 @@ fun Help(navController: NavController) {
             fontWeight = FontWeight.Medium
         )
     }
-}
-
-@Preview(showBackground = true, showSystemUi = true, device = "id:pixel_6_pro")
-@Composable
-fun OptionsPreview() {
-    Options(navController = rememberNavController())
 }

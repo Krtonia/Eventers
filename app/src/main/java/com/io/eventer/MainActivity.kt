@@ -10,7 +10,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.io.eventer.navigation.Navigation
 import com.io.eventer.ui.theme.EventerTheme
-import com.example.eventer.R
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -19,7 +18,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            EventerTheme {
+            EventerTheme(dynamicColor = true) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background

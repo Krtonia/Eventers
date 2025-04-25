@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.eventer.R
+import com.io.eventer.R
 import com.io.eventer.navigation.Routes
 import com.io.eventer.ui.auth.ViewModel.AuthViewModel
 import com.io.eventer.ui.auth.api.AuthState

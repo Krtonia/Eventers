@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -27,19 +28,22 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.io.eventer.navigation.Routes
 import com.io.eventer.ui.theme.firasans
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-import com.example.eventer.R
+import com.io.eventer.R
+import com.io.eventer.ui.theme.EventerTheme
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -98,9 +102,7 @@ fun ProfileContent(navController: NavController, modifier: Modifier = Modifier) 
                 selectedImageUri = uri
             }
         )
-
         WelcomeText()
-
         ProfileMenuItems(navController)
     }
 }
@@ -173,12 +175,11 @@ fun ProfileHeader(onImageSelected: (Uri) -> Unit) {
                 contentDescription = "Profile Image",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(200.dp)  // Increased from 150.dp to 200.dp
+                    .size(200.dp)
                     .clip(CircleShape)
                     .clickable { galleryLauncher.launch("image/*") }
             )
 
-            // Edit icon positioned at bottom right of profile image
             Image(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -213,66 +214,78 @@ fun ProfileMenuItems(navController: NavController) {
     val context = LocalContext.current
 
     Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        ProfileMenuItem(
-            iconResId = R.drawable.profile,
-            title = "My Profile",
-            onClick = { navController.navigate(Routes.nineth) }
-        )
-
+        ElevatedCard(modifier = Modifier.padding(horizontal = 20.dp)) {
+            ProfileMenuItem(
+                iconResId = R.drawable.profile,
+                title = "My Profile",
+                onClick = { navController.navigate(Routes.nineth) }
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
 
-        ProfileMenuItem(
-            iconResId = R.drawable.notification,
-            title = "Notifications",
-            onClick = { /* Handle notifications click */ }
-        )
+        ElevatedCard(modifier = Modifier.padding(horizontal = 20.dp)) {
 
+            ProfileMenuItem(
+                iconResId = R.drawable.notification,
+                title = "Notifications",
+                onClick = { /* Handle notifications click */ }
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
 
-        ProfileMenuItem(
-            iconResId = R.drawable.notes,
-            title = "Notes",
-            onClick = {
-                val googleNotesPackage = "com.google.android.keep"
-                val intent = context.packageManager.getLaunchIntentForPackage(googleNotesPackage)
+        ElevatedCard(modifier = Modifier.padding(horizontal = 20.dp)) {
 
-                if (intent != null) {
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(intent)
-                } else {
-                    val browserIntent = Intent(Intent.ACTION_VIEW).apply {
-                        data = android.net.Uri.parse("https://keep.google.com/")
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            ProfileMenuItem(
+                iconResId = R.drawable.notes,
+                title = "Notes",
+                onClick = {
+                    val googleNotesPackage = "com.google.android.keep"
+                    val intent =
+                        context.packageManager.getLaunchIntentForPackage(googleNotesPackage)
+
+                    if (intent != null) {
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        context.startActivity(intent)
+                    } else {
+                        val browserIntent = Intent(Intent.ACTION_VIEW).apply {
+                            data = android.net.Uri.parse("https://keep.google.com/")
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(browserIntent)
                     }
-                    context.startActivity(browserIntent)
                 }
-            }
-        )
-
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
 
-        ProfileMenuItem(
-            iconResId = R.drawable.share,
-            title = "Share",
-            onClick = {
-                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(Intent.EXTRA_TEXT, "Check out this awesome Event!")
+        ElevatedCard(modifier = Modifier.padding(horizontal = 20.dp)) {
+
+            ProfileMenuItem(
+                iconResId = R.drawable.share,
+                title = "Share",
+                onClick = {
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, "Check out this awesome Event!")
+                    }
+
+                    val chooserIntent = Intent.createChooser(
+                        shareIntent,
+                        "Share via"
+                    )
+
+                    ContextCompat.startActivity(context, chooserIntent, null)
                 }
-
-                val chooserIntent = Intent.createChooser(
-                    shareIntent,
-                    "Share via"
-                )
-
-                ContextCompat.startActivity(context, chooserIntent, null)
-            }
-        )
+            )
+        }
     }
+
 }
 
 @Composable
@@ -285,13 +298,12 @@ fun ProfileMenuItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
+            .padding(vertical = 12.dp, horizontal = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
             painter = painterResource(id = iconResId),
             contentDescription = "$title icon",
-            modifier = Modifier.size(48.dp),
             colorFilter = ColorFilter.tint(color = if (isSystemInDarkTheme()) Color.White else Color.Black)
         )
 
@@ -310,5 +322,13 @@ fun ProfileMenuItem(
             contentDescription = "Navigate",
             modifier = Modifier.size(32.dp)
         )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun ProfilePreview() {
+    EventerTheme(dynamicColor = true) {
+        Profile(navController = rememberNavController())
     }
 }

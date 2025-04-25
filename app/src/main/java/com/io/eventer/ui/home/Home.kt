@@ -45,10 +45,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.navigation.compose.rememberNavController
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
-import com.example.eventer.R
+import com.io.eventer.R
+import com.io.eventer.ui.theme.EventerTheme
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -269,9 +271,6 @@ fun QRScanner(
             confirmButton = {
                 Button(
                     modifier = Modifier.padding(14.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF82C8E5)
-                    ),
                     onClick = onDismiss
                 ) {
                     Text(text = "Close", color = Color.Black)
@@ -344,5 +343,13 @@ fun QRScanner(
                 }
             }
         )
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(showBackground = true, showSystemUi = true, device = "id:pixel_6_pro")
+@Composable
+fun HomePreview() {
+    EventerTheme(dynamicColor = false) {
+        Home(navController = rememberNavController())
     }
 }

@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.eventer"
+    namespace = "com.io.eventer"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.eventer"
+        applicationId = "com.io.eventer"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
