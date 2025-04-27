@@ -179,7 +179,8 @@ fun EventDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
             modifier = Modifier.fillMaxWidth()
         )
     }, dismissButton = {
-        Button(onClick = onDismiss
+        Button(
+            onClick = onDismiss
         ) { Text(text = "Cancel") }
     })
 }
@@ -343,13 +344,5 @@ fun QRScanner(
                 }
             }
         )
-    }
-}
-
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true, showSystemUi = true, device = "id:pixel_6_pro")
-@Composable
-fun HomePreview() {
-    EventerTheme(dynamicColor = false) {
-        Home(navController = rememberNavController())
     }
 }

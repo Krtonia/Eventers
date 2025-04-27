@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,24 +20,53 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.io.eventer.navigation.Routes
 import com.io.eventer.R
+import com.io.eventer.ui.auth.viewmodel.AuthViewModel
 import com.io.eventer.ui.theme.firasans
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun Welcome(navController: NavController) {
+    val viewModel: AuthViewModel = hiltViewModel()
+    val coroutineScope = rememberCoroutineScope()
 
-    // LaunchedEffect to automatically navigate after 1 second
-    LaunchedEffect(key1 = true) {
-        delay(300)
-        navController.navigate(Routes.second) {
-            popUpTo(navController.graph.startDestinationId) {
-                inclusive = true
+    LaunchedEffect(key1 = Unit) {
+        coroutineScope.launch {
+            delay(1500)
+            try {
+                val isLoggedIn = viewModel.isUserLoggedIn()
+                android.util.Log.d("Welcome", "User logged in: $isLoggedIn")
+                if (isLoggedIn) {
+                    navController.navigate(Routes.fourth) {
+                        popUpTo(Routes.first) { inclusive = true }
+                    }
+                } else {
+                    navController.navigate(Routes.second) {
+                        popUpTo(Routes.first) { inclusive = true }
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("Welcome", "Error checking login status", e)
+                navController.navigate(Routes.second) {
+                    popUpTo(Routes.first) { inclusive = true }
+                }
             }
         }
     }
+
+    // LaunchedEffect to automatically navigate after 1 second
+//    LaunchedEffect(key1 = true) {
+//        delay(300)
+//        navController.navigate(Routes.second) {
+//            popUpTo(navController.graph.startDestinationId) {
+//                inclusive = true
+//            }
+//        }
+//    }
 
     Column(
         modifier = Modifier

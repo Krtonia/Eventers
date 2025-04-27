@@ -2,17 +2,19 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-kapt")
-    id ("com.google.dagger.hilt.android")
+    id("com.google.dagger.hilt.android")
+    id("org.jetbrains.kotlin.plugin.compose") version "2.1.20"
+    kotlin("plugin.serialization") version "1.9.20"
 }
 
 android {
     namespace = "com.io.eventer"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.io.eventer"
         minSdk = 28
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -32,11 +34,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
     buildFeatures {
         compose = true
@@ -55,7 +57,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -65,11 +66,11 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
-    implementation (libs.androidx.constraintlayout.compose)
-    implementation (libs.androidx.camera.camera2)
-    implementation (libs.androidx.camera.lifecycle)
-    implementation (libs.camera.view)
-    implementation (libs.barcode.scanning)
+    implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.camera.view)
+    implementation(libs.barcode.scanning)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.coil.compose)
     testImplementation(libs.junit)
@@ -80,27 +81,47 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    //Kotlin
+    implementation(libs.kotlin.stdlib)
+
     //Hilt
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     //Security
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
-    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.accompanist.permissions)
 
     //lifecycle compose
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+    implementation(libs.androidx.lifecycle.runtime.ktx.v262)
+    implementation(libs.androidx.lifecycle.viewmodel.compose.v262)
+    implementation(libs.androidx.lifecycle.compose)
 
     //Retrofit && Gson
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 
     //OkHttp
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation(libs.okhttp)
 
     //Kapt
-    kapt("androidx.lifecycle:lifecycle-compiler:2.8.7")
+    kapt(libs.androidx.lifecycle.compiler)
+
+    //Supabase
+    implementation(platform(libs.bom))
+    implementation(libs.supabase.postgrest.kt)
+    implementation(libs.auth.kt)
+
+    // Ktor
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.logging)
+    implementation(libs.ktor.client.auth)
+
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
 }

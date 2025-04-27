@@ -99,7 +99,6 @@ fun Options(navController: NavController) {
             }
         },
         content = { paddingValues ->
-            // Apply the padding values from Scaffold
             Box(modifier = Modifier.padding(paddingValues)) {
                 Sed(navController)
             }
@@ -114,16 +113,14 @@ fun Sed(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp) // Add some padding around the edges
+            .padding(16.dp)
     ) {
-        // First Row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp), // Add top padding to account for app bar
+                .padding(top = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Calendar Card
             OptionCard(
                 modifier = Modifier.weight(1f),
                 imageRes = R.drawable.calender,

@@ -44,6 +44,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import com.io.eventer.R
 import com.io.eventer.ui.theme.EventerTheme
+import androidx.core.net.toUri
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -164,7 +165,6 @@ fun ProfileHeader(onImageSelected: (Uri) -> Unit) {
             .height(280.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Profile image
         Box(contentAlignment = Alignment.Center) {
             Image(
                 painter = if (imageUri != null) {
@@ -183,8 +183,8 @@ fun ProfileHeader(onImageSelected: (Uri) -> Unit) {
             Image(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .offset(x = (-12).dp, y = (-12).dp)  // Adjusted offset for larger profile image
-                    .size(40.dp)  // Slightly increased the edit icon size
+                    .offset(x = (-12).dp, y = (-12).dp)
+                    .size(40.dp)
                     .clickable { galleryLauncher.launch("image/*") },
                 painter = painterResource(id = R.drawable.edit),
                 contentDescription = "Change Image"
@@ -254,7 +254,7 @@ fun ProfileMenuItems(navController: NavController) {
                         context.startActivity(intent)
                     } else {
                         val browserIntent = Intent(Intent.ACTION_VIEW).apply {
-                            data = android.net.Uri.parse("https://keep.google.com/")
+                            data = "https://keep.google.com/".toUri()
                             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         }
                         context.startActivity(browserIntent)

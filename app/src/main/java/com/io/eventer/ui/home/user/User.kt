@@ -128,7 +128,6 @@ fun UserContent(navController: NavController) {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Surname TextField
         UserInfoTextField(
             label = "Surname",
             labelColor = if (isSystemInDarkTheme()) Color.White else Color.Black,
@@ -141,7 +140,6 @@ fun UserContent(navController: NavController) {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Email TextField
         UserInfoTextField(
             label = "Email",
             labelColor = if (isSystemInDarkTheme()) Color.White else Color.Black,
@@ -154,25 +152,23 @@ fun UserContent(navController: NavController) {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Save Button
         Button(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp)
                 .height(55.dp),
             onClick = {
-                // Validate all fields
+                // Validate everything
                 userNameError = validateUsername(userName.text)
                 nameError = validateName(name.text)
                 surnameError = validateSurname(surname.text)
                 emailError = validateEmail(email.text)
 
-                // Check if there are any errors
+                // Check for errors
                 val hasErrors = listOf(userNameError, nameError, surnameError, emailError)
                     .any { it != null }
 
                 if (!hasErrors) {
-                    // Save user information
                     saveUserInformation(
                         userName.text,
                         name.text,
@@ -180,16 +176,13 @@ fun UserContent(navController: NavController) {
                         email.text
                     )
 
-                    // Show success toast
                     Toast.makeText(
                         context,
                         "User information saved successfully!",
                         Toast.LENGTH_SHORT
                     ).show()
 
-                    // navController.navigate("someRoute")
                 } else {
-                    // Show error toast
                     Toast.makeText(
                         context,
                         "Please correct the errors in the form",
@@ -210,7 +203,6 @@ fun UserContent(navController: NavController) {
             )
         }
 
-        // Add some bottom padding to ensure all content is visible
         Spacer(modifier = Modifier.height(32.dp))
     }
 }
@@ -254,7 +246,6 @@ fun UserInfoTextField(
             isError = errorMessage != null
         )
 
-        // Display error message if exists
         errorMessage?.let {
             Text(
                 text = it,
@@ -266,7 +257,6 @@ fun UserInfoTextField(
     }
 }
 
-// Validation Functions
 fun validateUsername(username: String): String? {
     return when {
         username.isBlank() -> "Username cannot be empty"
@@ -306,7 +296,6 @@ fun validateEmail(email: String): String? {
     }
 }
 
-// Function to save user information
 fun saveUserInformation(
     userName: String,
     name: String,
@@ -314,9 +303,6 @@ fun saveUserInformation(
     email: String
 ) {
     // TODO: Implement your saving mechanism
-    // - Saving to a local database (Room)
-    // - Sending to a backend API
-    // For now, just print to console
     println("Saving User Information:")
     println("Username: $userName")
     println("Name: $name")
