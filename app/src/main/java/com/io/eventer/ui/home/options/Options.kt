@@ -44,11 +44,12 @@ import com.io.eventer.R
 import com.io.eventer.navigation.Routes
 import com.io.eventer.ui.theme.firasans
 import androidx.core.net.toUri
+import io.github.jan.supabase.SupabaseClient
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Options(navController: NavController) {
+fun Options (navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -150,7 +151,7 @@ fun Sed(navController: NavController) {
                 modifier = Modifier.weight(1f),
                 imageRes = R.drawable.logout,
                 text = "",
-                onClick = { /* TODO: Handle logout */ }
+                onClick = {  }
             )
         }
 

@@ -3,7 +3,6 @@ package com.io.eventer.ui.home
 import android.annotation.SuppressLint
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,6 +34,7 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.size
@@ -45,19 +45,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.navigation.compose.rememberNavController
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
 import com.io.eventer.R
-import com.io.eventer.ui.theme.EventerTheme
+import com.io.eventer.model.Event
+import com.io.eventer.ui.home.event.EventViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun Home(navController: NavController) {
-    var cardCount by remember { mutableIntStateOf(0) }
+fun Home(navController: NavController, viewModel: EventViewModel = hiltViewModel()) {
     var showDialog by remember { mutableStateOf(false) }
-    val cardList = remember { mutableStateListOf<String>() }
+    val uiState by viewModel.uiState.collectAsState()
+    var showImageUpdateDialog by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) },
@@ -65,7 +68,8 @@ fun Home(navController: NavController) {
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 elevation = FloatingActionButtonDefaults.elevation(12.dp),
-                onClick = { showDialog = true }) {
+                onClick = { showDialog = true }
+            ) {
                 Icon(Icons.Filled.Add, contentDescription = "Add")
                 Text(
                     fontSize = 17.sp,
@@ -76,19 +80,56 @@ fun Home(navController: NavController) {
                 )
             }
         },
-    ) {
-        Card(cardList = cardList)
+    ) {paddingValues ->
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        //On failure
+        uiState.error?.let { error ->
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Error: $error")
+            }
+        }
+
+        // Load and Display events from database(events activity does not work)
+        EventCards(
+            events = uiState.events,
+            onImageClick = { eventId ->
+                showImageUpdateDialog = eventId
+            }
+        )
+
         if (showDialog) {
-            EventDialog(onDismiss = { showDialog = false }, onConfirm = { customText ->
-                cardList.add(customText)
-            })
+            EventDialog(
+                onDismiss = { showDialog = false },
+                onConfirm = { eventTitle ->
+                    viewModel.createEvent(eventTitle)
+                    showDialog = false
+                }
+            )
+        }
+
+        showImageUpdateDialog?.let { eventId ->
+            ImageUpdateDialog(
+                onDismiss = { showImageUpdateDialog = null },
+                onConfirm = { imageUrl ->
+                    viewModel.updateEventImage(eventId, imageUrl)
+                    showImageUpdateDialog = null
+                }
+            )
         }
     }
 }
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
-    NavigationBar() {
+    NavigationBar{
         val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
         NavigationBarItem(
             selected = currentRoute == Routes.fourth,
@@ -185,8 +226,12 @@ fun EventDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     })
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun Card(cardList: List<String>) {
+fun EventCards(
+    events: List<Event>,
+    onImageClick: (String) -> Unit
+) {
     Column(
         modifier = Modifier.padding(top = 76.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -195,7 +240,7 @@ fun Card(cardList: List<String>) {
         Spacer(modifier = Modifier.height(9.dp))
 
         LazyColumn {
-            items(cardList) { cardText ->
+            items(events) { event ->
                 ElevatedCard(
                     onClick = { /* TODO: Card action */ },
                     modifier = Modifier
@@ -207,21 +252,49 @@ fun Card(cardList: List<String>) {
                     shape = RoundedCornerShape(22.dp)
                 ) {
                     Column {
-                        Image(
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(180.dp),
-                            contentScale = ContentScale.Crop,
-                            painter = painterResource(id = R.drawable.party),
-                            contentDescription = "Home page Image"
-                        )
+                                .height(180.dp)
+                                .clickable {
+                                    event.id?.let { id -> onImageClick(id) }
+                                }
+                        ) {
+                            GlideImage(
+                                model = event.imageUrl,
+                                contentDescription = "Event Image (Tap to change)",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            ) { requestBuilder ->
+                                requestBuilder
+                                    .placeholder(R.drawable.placeholder) // Placeholder while loading
+                                    .error(R.drawable.placeholder) //If for some reason image loading fails
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(8.dp)
+                                    .background(
+                                        color = Color.Black.copy(alpha = 0.6f),
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                            ) {
+                                Text(
+                                    text = "Tap to change image",
+                                    color = Color.White,
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.padding(4.dp)
+                                )
+                            }
+                        }
+
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(20.dp)
                         ) {
                             Text(
-                                text = cardText,
+                                text = event.title,
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -233,6 +306,46 @@ fun Card(cardList: List<String>) {
     }
 }
 
+@Composable
+fun ImageUpdateDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+    var imageUrl by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (imageUrl.isNotBlank()) {
+                        onConfirm(imageUrl)
+                    }
+                }
+            ) {
+                Text(text = "Update")
+            }
+        },
+        title = {
+            Text(
+                text = "Update Event Image",
+                fontFamily = firasans,
+                fontWeight = FontWeight.SemiBold
+            )
+        },
+        text = {
+            OutlinedTextField(
+                value = imageUrl,
+                onValueChange = { imageUrl = it },
+                shape = RoundedCornerShape(25.dp),
+                placeholder = { Text("Enter image URL") },
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text(text = "Cancel")
+            }
+        }
+    )
+}
 
 @Suppress("DEPRECATION")
 @androidx.annotation.OptIn(ExperimentalGetImage::class)

@@ -121,6 +121,11 @@ dependencies {
     implementation(libs.ktor.client.logging)
     implementation(libs.ktor.client.auth)
 
+    //Glide
+    implementation(libs.glide)
+    annotationProcessor(libs.compiler)
+    implementation(libs.compose)
+
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)

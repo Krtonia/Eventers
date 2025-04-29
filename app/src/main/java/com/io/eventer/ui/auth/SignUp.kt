@@ -62,8 +62,6 @@ fun SignUp(navController: NavController) {
     LaunchedEffect(registrationMessage) {
         registrationMessage?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-
-            //On successful registration move to login screen
             if (it.contains("successful")) {
                 navController.navigate(Routes.second) {
                     popUpTo(Routes.third) { inclusive = true }
@@ -82,7 +80,7 @@ fun SignUp(navController: NavController) {
         )
 
         if (state is AuthState.Loading) {
-            Box(
+            Box(modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
