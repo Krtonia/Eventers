@@ -45,6 +45,7 @@ import java.util.*
 import com.io.eventer.R
 import com.io.eventer.ui.theme.EventerTheme
 import androidx.core.net.toUri
+import io.github.jan.supabase.SupabaseClient
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -195,6 +196,7 @@ fun ProfileHeader(onImageSelected: (Uri) -> Unit) {
 
 @Composable
 fun WelcomeText() {
+    val supabase : SupabaseClient
     Box(
         contentAlignment = Alignment.Center, modifier = Modifier
             .fillMaxWidth()

@@ -90,7 +90,7 @@ fun SignIn(navController: NavController) {
 
 
         if (state is AuthState.Loading) {
-            Box(
+            Box(modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(

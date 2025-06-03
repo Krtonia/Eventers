@@ -2,6 +2,8 @@ package com.io.eventer.ui.home.options
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,7 +46,11 @@ import com.io.eventer.R
 import com.io.eventer.navigation.Routes
 import com.io.eventer.ui.theme.firasans
 import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.io.eventer.ui.home.event.viewmodel.EventViewModel
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.SignOutScope
+import io.github.jan.supabase.auth.auth
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,7 +116,8 @@ fun Options (navController: NavController) {
 @Composable
 fun Sed(navController: NavController) {
     val context = LocalContext.current
-
+    val supabase : SupabaseClient
+    val viewmodel : EventViewModel = hiltViewModel()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -151,7 +158,7 @@ fun Sed(navController: NavController) {
                 modifier = Modifier.weight(1f),
                 imageRes = R.drawable.logout,
                 text = "",
-                onClick = {  }
+                onClick = { viewmodel.signOut(navController) }
             )
         }
 
@@ -159,7 +166,7 @@ fun Sed(navController: NavController) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 232.dp), // 200 (card height) + 32 (spacing)
+                .padding(top = 232.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             // Help Card

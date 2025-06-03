@@ -1,10 +1,14 @@
-package com.io.eventer.ui.home.event
+package com.io.eventer.ui.home.event.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import com.io.eventer.model.Event
-import com.io.eventer.ui.auth.components.State
+import com.io.eventer.model.EventState
+import com.io.eventer.model.EventUiState
+import com.io.eventer.navigation.Routes
+import com.io.eventer.ui.auth.components.AuthState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -19,6 +23,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 class EventViewModel @Inject constructor(private val supabaseClient: SupabaseClient) : ViewModel() {
@@ -26,8 +31,8 @@ class EventViewModel @Inject constructor(private val supabaseClient: SupabaseCli
     private val _uiState = MutableStateFlow(EventUiState())
     val uiState: StateFlow<EventUiState> = _uiState.asStateFlow()
 
-    private val _authState = MutableStateFlow(State())
-    val authState: StateFlow<State> = _authState.asStateFlow()
+    private val _authState = MutableStateFlow(EventState())
+    val authState: StateFlow<EventState> = _authState.asStateFlow()
 
     init {
         fetchEvents()
@@ -95,13 +100,16 @@ class EventViewModel @Inject constructor(private val supabaseClient: SupabaseCli
                     SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
                 val formattedDate = dateFormat.format(Date())
 
+                val eventCode = generateSixDigitCode()
+
                 val newEvent = Event(
                     id = UUID.randomUUID().toString(),
                     title = title,
                     description = description,
                     imageUrl = imageUrl,
                     createdAt = formattedDate,
-                    user_id = userId
+                    user_id = userId,
+                    code = generateSixDigitCode()
                 )
 
                 Log.d("EventViewModel", "Creating event: $newEvent")
@@ -111,6 +119,28 @@ class EventViewModel @Inject constructor(private val supabaseClient: SupabaseCli
             } catch (e: Exception) {
                 Log.e("EventViewModel", "Error creating event", e)
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun signOut(navController: NavController) {
+        viewModelScope.launch {
+            try {
+                supabaseClient.auth.signOut()
+                _authState.update {
+                    EventState(isAuthenticated = false, userId = null, error = null)
+                }
+                _uiState.update { EventUiState() }
+                navController.navigate(Routes.second) {
+                    popUpTo(0) {
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                    restoreState = false
+                }
+            } catch (e: Exception) {
+                _authState.update { it.copy(error = e.message) }
+                Log.e("EventViewModel", "Sign out failed", e)
             }
         }
     }
@@ -139,4 +169,18 @@ class EventViewModel @Inject constructor(private val supabaseClient: SupabaseCli
             }
         }
     }
+
+    private fun generateSixDigitCode(): String {
+        val random = Random
+        val code = StringBuilder()
+        repeat(6) {
+            code.append(random.nextInt(10))
+        }
+        return code.toString()
+    }
+
+    fun createShareableText(event: Event): String {
+        return "🎉 Join us for ${event.title}!\n\nUse code: ${event.code}\n\nDon't miss out on this amazing event!"
+    }
+
 }

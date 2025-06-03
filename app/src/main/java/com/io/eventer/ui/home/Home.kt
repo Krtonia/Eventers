@@ -1,6 +1,8 @@
 package com.io.eventer.ui.home
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -43,6 +45,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,7 +56,7 @@ import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
 import com.io.eventer.R
 import com.io.eventer.model.Event
-import com.io.eventer.ui.home.event.EventViewModel
+import com.io.eventer.ui.home.event.viewmodel.EventViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -88,7 +91,6 @@ fun Home(navController: NavController, viewModel: EventViewModel = hiltViewModel
                 CircularProgressIndicator()
             }
         }
-        //On failure
         uiState.error?.let { error ->
             Box(
                 contentAlignment = Alignment.Center
@@ -96,15 +98,15 @@ fun Home(navController: NavController, viewModel: EventViewModel = hiltViewModel
                 Text("Error: $error")
             }
         }
-
-        // Load and Display events from database(events activity does not work)
         EventCards(
             events = uiState.events,
             onImageClick = { eventId ->
                 showImageUpdateDialog = eventId
+            },
+            onEventClick = { eventId ->
+                navController.navigate("${Routes.tenth}/$eventId")
             }
         )
-
         if (showDialog) {
             EventDialog(
                 onDismiss = { showDialog = false },
@@ -114,7 +116,6 @@ fun Home(navController: NavController, viewModel: EventViewModel = hiltViewModel
                 }
             )
         }
-
         showImageUpdateDialog?.let { eventId ->
             ImageUpdateDialog(
                 onDismiss = { showImageUpdateDialog = null },
@@ -180,14 +181,14 @@ fun TopAppBarContent() {
             }
         })
 
-    if (showQRScanner) {
-        QRScanner(
-            onQRCodeScanned = { qrContent ->
-                println("You're Scanned QR Code: $qrContent")
-            },
-            onDismiss = { showQRScanner = false }
-        )
-    }
+//    if (showQRScanner) {
+//        QRScanner(
+//            onQRCodeScanned = { qrContent ->
+//                println("You're Scanned QR Code: $qrContent")
+//            },
+//            onDismiss = { showQRScanner = false }
+//        )
+//    }
 }
 
 
@@ -230,7 +231,8 @@ fun EventDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
 @Composable
 fun EventCards(
     events: List<Event>,
-    onImageClick: (String) -> Unit
+    onImageClick: (String) -> Unit,
+    onEventClick: (String) -> Unit
 ) {
     Column(
         modifier = Modifier.padding(top = 76.dp),
@@ -242,7 +244,13 @@ fun EventCards(
         LazyColumn {
             items(events) { event ->
                 ElevatedCard(
-                    onClick = { /* TODO: Card action */ },
+                    onClick = {
+                        event.id?.let { id ->
+                            if (id.isNotBlank()) {
+                                onEventClick(id)
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .padding(top = 20.dp)
                         .fillMaxWidth()
@@ -257,7 +265,11 @@ fun EventCards(
                                 .fillMaxWidth()
                                 .height(180.dp)
                                 .clickable {
-                                    event.id?.let { id -> onImageClick(id) }
+                                    event.id?.let { id ->
+                                        if (id.isNotBlank()) {
+                                            onImageClick(id)
+                                        }
+                                    }
                                 }
                         ) {
                             GlideImage(
@@ -267,8 +279,8 @@ fun EventCards(
                                 modifier = Modifier.fillMaxSize()
                             ) { requestBuilder ->
                                 requestBuilder
-                                    .placeholder(R.drawable.placeholder) // Placeholder while loading
-                                    .error(R.drawable.placeholder) //If for some reason image loading fails
+                                    .placeholder(R.drawable.placeholder)
+                                    .error(R.drawable.placeholder)
                             }
                             Box(
                                 modifier = Modifier
@@ -291,13 +303,35 @@ fun EventCards(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(20.dp)
+                                .padding(horizontal = 20.dp, vertical = 12.dp)
                         ) {
                             Text(
                                 text = event.title,
                                 fontSize = 22.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
+
+                            if (event.description.isNotEmpty()) {
+                                Text(
+                                    text = event.description,
+                                    fontSize = 14.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = Color.Gray,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                )
+                            }
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.End)
+                                    .padding(top = 4.dp)
+                            ) {
+                                Text(
+                                    text = "Tap to view details",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
                 }
@@ -345,117 +379,4 @@ fun ImageUpdateDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
             }
         }
     )
-}
-
-@Suppress("DEPRECATION")
-@androidx.annotation.OptIn(ExperimentalGetImage::class)
-@Composable
-fun QRScanner(
-    onQRCodeScanned: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val cameraProviderFuture = remember { ProcessCameraProvider.getInstance(context) }
-
-    var hasCameraPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                android.Manifest.permission.CAMERA
-            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        )
-    }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        hasCameraPermission = isGranted
-    }
-
-    LaunchedEffect(Unit) {
-        if (!hasCameraPermission) {
-            launcher.launch(android.Manifest.permission.CAMERA)
-        }
-    }
-
-    if (hasCameraPermission) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            confirmButton = {
-                Button(
-                    modifier = Modifier.padding(14.dp),
-                    onClick = onDismiss
-                ) {
-                    Text(text = "Close", color = Color.Black)
-                }
-            },
-            text = {
-                Box(
-                    modifier = Modifier
-                        .size(300.dp)
-                ) {
-                    AndroidView(
-                        factory = { context ->
-                            val previewView = PreviewView(context).apply {
-                                layoutParams = ViewGroup.LayoutParams(
-                                    ViewGroup.LayoutParams.MATCH_PARENT,
-                                    ViewGroup.LayoutParams.MATCH_PARENT
-                                )
-                            }
-
-                            val preview = Preview.Builder().build()
-                            preview.setSurfaceProvider(previewView.surfaceProvider)
-
-                            val imageAnalysis = ImageAnalysis.Builder()
-                                .setTargetResolution(Size(1280, 720))
-                                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                                .build()
-
-                            val scanner = BarcodeScanning.getClient()
-                            val executor = Executors.newSingleThreadExecutor()
-
-                            imageAnalysis.setAnalyzer(executor) { imageProxy ->
-                                val mediaImage = imageProxy.image
-                                if (mediaImage != null) {
-                                    val image = InputImage.fromMediaImage(
-                                        mediaImage,
-                                        imageProxy.imageInfo.rotationDegrees
-                                    )
-                                    scanner.process(image)
-                                        .addOnSuccessListener { barcodes ->
-                                            barcodes.firstOrNull()?.rawValue?.let { qrContent ->
-                                                onQRCodeScanned(qrContent)
-                                                onDismiss()
-                                            }
-                                        }
-                                        .addOnCompleteListener {
-                                            imageProxy.close()
-                                        }
-                                } else {
-                                    imageProxy.close()
-                                }
-                            }
-
-                            try {
-                                cameraProviderFuture.addListener({
-                                    val cameraProvider = cameraProviderFuture.get()
-                                    cameraProvider.unbindAll()
-                                    cameraProvider.bindToLifecycle(
-                                        lifecycleOwner,
-                                        CameraSelector.DEFAULT_BACK_CAMERA,
-                                        preview,
-                                        imageAnalysis
-                                    )
-                                }, ContextCompat.getMainExecutor(context))
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                            previewView
-                        }
-                    )
-                }
-            }
-        )
-    }
 }

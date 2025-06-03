@@ -1,6 +1,4 @@
-package com.io.eventer.ui.home.event
-
-import com.io.eventer.model.Event
+package com.io.eventer.model
 
 data class EventUiState(
     val isLoading: Boolean = false,

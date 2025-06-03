@@ -11,4 +11,5 @@ object Routes
     val seventh = "Info"
     val eigth = "Help"
     val nineth = "User"
+    val tenth = "EventDetail"
 }
