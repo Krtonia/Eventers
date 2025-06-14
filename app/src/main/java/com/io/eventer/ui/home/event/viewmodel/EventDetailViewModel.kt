@@ -109,7 +109,6 @@ class EventDetailViewModel @Inject constructor(
                     "title" to title,
                     "description" to description,
                     "summary" to summary
-                    // We don't update the code as it should remain fixed once generated
                 )
                 supabaseClient.postgrest["events"]
                     .update(updatedData) {

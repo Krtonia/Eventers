@@ -8,7 +8,7 @@ import com.io.eventer.model.Event
 import com.io.eventer.model.EventState
 import com.io.eventer.model.EventUiState
 import com.io.eventer.navigation.Routes
-import com.io.eventer.ui.auth.components.AuthState
+import com.io.eventer.ui.auth.components.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -22,11 +22,14 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
+import java.util.Random
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
-class EventViewModel @Inject constructor(private val supabaseClient: SupabaseClient) : ViewModel() {
+class EventViewModel @Inject constructor(
+    private val supabaseClient: SupabaseClient,
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EventUiState())
     val uiState: StateFlow<EventUiState> = _uiState.asStateFlow()
@@ -76,11 +79,26 @@ class EventViewModel @Inject constructor(private val supabaseClient: SupabaseCli
 
     fun fetchEvents() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
             try {
-                val events = supabaseClient.postgrest["events"].select().decodeList<Event>()
-                _uiState.update { it.copy(events = events, isLoading = false, error = null) }
+                _uiState.update { it.copy(isLoading = true, error = null) }
+
+                val currentUser = authRepository.getCurrentUser()
+                if (currentUser == null || currentUser.id.isNullOrBlank()) {
+                    throw Exception("User not authenticated")
+                }
+
+                // Fetch events where user_id matches the current user's ID
+                val events = supabaseClient.postgrest["events"]
+                    .select {
+                        filter {
+                            eq("user_id", currentUser.id)
+                        }
+                    }
+                    .decodeList<Event>()
+
+                _uiState.update { it.copy(events = events, isLoading = false) }
             } catch (e: Exception) {
+                Log.e("Home", "Error fetching events", e)
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
@@ -100,6 +118,7 @@ class EventViewModel @Inject constructor(private val supabaseClient: SupabaseCli
                     SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
                 val formattedDate = dateFormat.format(Date())
 
+                // Generate a random 6-digit code
                 val eventCode = generateSixDigitCode()
 
                 val newEvent = Event(
@@ -109,18 +128,27 @@ class EventViewModel @Inject constructor(private val supabaseClient: SupabaseCli
                     imageUrl = imageUrl,
                     createdAt = formattedDate,
                     user_id = userId,
-                    code = generateSixDigitCode()
+                    code = eventCode,
                 )
 
                 Log.d("EventViewModel", "Creating event: $newEvent")
                 supabaseClient.postgrest["events"].insert(newEvent)
-                Log.d("EventViewModel", "Event created successfully")
+                Log.d("EventViewModel", "Event created successfully with code: $eventCode")
                 fetchEvents() // Refresh
             } catch (e: Exception) {
                 Log.e("EventViewModel", "Error creating event", e)
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }
         }
+    }
+
+    private fun generateSixDigitCode(): String {
+        val random = Random()
+        val code = StringBuilder()
+        repeat(6) {
+            code.append(random.nextInt(10))
+        }
+        return code.toString()
     }
 
     fun signOut(navController: NavController) {
@@ -169,18 +197,4 @@ class EventViewModel @Inject constructor(private val supabaseClient: SupabaseCli
             }
         }
     }
-
-    private fun generateSixDigitCode(): String {
-        val random = Random
-        val code = StringBuilder()
-        repeat(6) {
-            code.append(random.nextInt(10))
-        }
-        return code.toString()
-    }
-
-    fun createShareableText(event: Event): String {
-        return "🎉 Join us for ${event.title}!\n\nUse code: ${event.code}\n\nDon't miss out on this amazing event!"
-    }
-
 }

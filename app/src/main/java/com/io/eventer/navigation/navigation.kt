@@ -16,6 +16,7 @@ import com.io.eventer.ui.home.user.User
 import com.io.eventer.ui.Welcome
 import com.io.eventer.ui.auth.SignUp
 import com.io.eventer.ui.home.event.EventDetail
+import io.github.jan.supabase.SupabaseClient
 
 @Composable
 fun Navigation() {
