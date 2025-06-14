@@ -142,6 +142,25 @@ class EventViewModel @Inject constructor(
         }
     }
 
+    fun deleteEvent(eventId: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            try {
+                supabaseClient.postgrest["events"]
+                    .delete {
+                        filter {
+                            eq("id", eventId)
+                        }
+                    }
+                    .decodeList<Event>()
+                fetchEvents()
+            } catch (e: Exception) {
+                Log.e("EventViewModel", "Error deleting an event", e)
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
     private fun generateSixDigitCode(): String {
         val random = Random()
         val code = StringBuilder()

@@ -26,6 +26,7 @@ import com.io.eventer.ui.theme.firasans
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.style.TextOverflow
@@ -85,6 +86,7 @@ fun Home(navController: NavController, viewModel: EventViewModel = hiltViewModel
             onEventClick = { eventId ->
                 navController.navigate("${Routes.tenth}/$eventId")
             },
+            onDeleteEvent = viewModel::deleteEvent
         )
         if (showDialog) {
             EventDialog(
@@ -190,7 +192,8 @@ fun EventDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
 fun EventCards(
     events: List<Event>,
     onImageClick: (String) -> Unit,
-    onEventClick: (String) -> Unit
+    onEventClick: (String) -> Unit,
+    onDeleteEvent: (String) -> Unit
 ) {
     Column(
         modifier = Modifier.padding(top = 60.dp),
@@ -281,8 +284,15 @@ fun EventCards(
                                         modifier = Modifier.padding(4.dp)
                                     )
                                 }
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.TopEnd)
+                                ) {
+                                    IconButton(onClick = { onDeleteEvent(event.id ?: "") }) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Delete")
+                                    }
+                                }
                             }
-
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -293,7 +303,6 @@ fun EventCards(
                                     fontSize = 22.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
-
                                 if (event.description.isNotEmpty()) {
                                     Text(
                                         text = event.description,
@@ -307,14 +316,12 @@ fun EventCards(
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.End)
-                                        .padding(top = 4.dp)
                                 ) {
                                     Text(
                                         text = "Tap to view details",
                                         fontSize = 12.sp,
                                         color = MaterialTheme.colorScheme.primary
                                     )
-                                }
                             }
                         }
                     }
@@ -322,6 +329,7 @@ fun EventCards(
             }
         }
     }
+}
 }
 
 @Composable
