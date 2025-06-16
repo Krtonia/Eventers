@@ -33,6 +33,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.io.eventer.R
 import com.io.eventer.model.Event
 import com.io.eventer.ui.home.event.viewmodel.EventViewModel
@@ -109,6 +111,7 @@ fun Home(navController: NavController, viewModel: EventViewModel = hiltViewModel
     }
 }
 
+
 @Composable
 fun BottomNavigationBar(navController: NavController) {
     NavigationBar {
@@ -132,7 +135,8 @@ fun BottomNavigationBar(navController: NavController) {
                     contentDescription = "Options"
                 )
             },
-            label = { Text(text = "Options") })
+            label = { Text(text = "Options") }
+        )
     }
 }
 
@@ -148,14 +152,14 @@ fun TopAppBarContent() {
                 fontFamily = firasans,
                 fontWeight = FontWeight.SemiBold
             )
-        })
+        }
+    )
 }
 
 
 @Composable
 fun EventDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     var eventText by remember { mutableStateOf("") }
-
     AlertDialog(onDismissRequest = onDismiss, confirmButton = {
         Button(onClick = {
             if (eventText.isNotBlank()) {
@@ -193,135 +197,152 @@ fun EventCards(
     events: List<Event>,
     onImageClick: (String) -> Unit,
     onEventClick: (String) -> Unit,
+    viewModel: EventViewModel = hiltViewModel(),
     onDeleteEvent: (String) -> Unit
 ) {
+    var isRefreshing by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier.padding(top = 60.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Spacer(modifier = Modifier.height(9.dp))
-        if (events.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+        SwipeRefresh(
+            modifier = Modifier.fillMaxSize(1f),
+
+            state = rememberSwipeRefreshState(isRefreshing),
+            onRefresh = {
+                isRefreshing = true
+                viewModel.refreshEvents()
+                isRefreshing = false
+            },
+        ) {
+            if (events.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "No Events Yet",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontFamily = firasans
-                    )
-                    Text(
-                        text = "Create your first event using the + New button",
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        fontFamily = firasans
-                    )
-                }
-            }
-        } else {
-            LazyColumn {
-                items(events) { event ->
-                    ElevatedCard(
-                        onClick = {
-                            event.id?.let { id ->
-                                if (id.isNotBlank()) {
-                                    onEventClick(id)
-                                }
-                            }
-                        },
-                        modifier = Modifier
-                            .padding(top = 20.dp)
-                            .padding(vertical = 10.dp, horizontal = 20.dp)
-                            .height(250.dp),
-                        elevation = CardDefaults.cardElevation(8.dp),
-                        shape = RoundedCornerShape(22.dp)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        Column {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(180.dp)
-                                    .clickable {
-                                        event.id?.let { id ->
-                                            if (id.isNotBlank()) {
-                                                onImageClick(id)
+                        Text(
+                            text = "No Events Yet",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontFamily = firasans
+                        )
+                        Text(
+                            text = "Create your first event using the + New button",
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            fontFamily = firasans
+                        )
+                    }
+                }
+            } else {
+                LazyColumn {
+                    items(events) { event ->
+                        ElevatedCard(
+                            onClick = {
+                                event.id?.let { id ->
+                                    if (id.isNotBlank()) {
+                                        onEventClick(id)
+                                    }
+                                }
+                            },
+                            modifier = Modifier
+                                .padding(top = 20.dp)
+                                .padding(vertical = 10.dp, horizontal = 20.dp)
+                                .height(250.dp),
+                            elevation = CardDefaults.cardElevation(8.dp),
+                            shape = RoundedCornerShape(22.dp)
+                        ) {
+                            Column {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(180.dp)
+                                        .clickable {
+                                            event.id?.let { id ->
+                                                if (id.isNotBlank()) {
+                                                    onImageClick(id)
+                                                }
                                             }
                                         }
+                                ) {
+                                    GlideImage(
+                                        model = event.imageUrl,
+                                        contentDescription = "Event Image (Tap to change)",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    ) { requestBuilder ->
+                                        requestBuilder
+                                            .placeholder(R.drawable.placeholder)
+                                            .error(R.drawable.placeholder)
                                     }
-                            ) {
-                                GlideImage(
-                                    model = event.imageUrl,
-                                    contentDescription = "Event Image (Tap to change)",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize()
-                                ) { requestBuilder ->
-                                    requestBuilder
-                                        .placeholder(R.drawable.placeholder)
-                                        .error(R.drawable.placeholder)
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .padding(8.dp)
-                                        .background(
-                                            color = Color.Black.copy(alpha = 0.6f),
-                                            shape = RoundedCornerShape(4.dp)
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .padding(8.dp)
+                                            .background(
+                                                color = Color.Black.copy(alpha = 0.6f),
+                                                shape = RoundedCornerShape(4.dp)
+                                            )
+                                    ) {
+                                        Text(
+                                            text = "Tap to change image",
+                                            color = Color.White,
+                                            fontSize = 12.sp,
+                                            modifier = Modifier.padding(4.dp)
                                         )
-                                ) {
-                                    Text(
-                                        text = "Tap to change image",
-                                        color = Color.White,
-                                        fontSize = 12.sp,
-                                        modifier = Modifier.padding(4.dp)
-                                    )
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                ) {
-                                    IconButton(onClick = { onDeleteEvent(event.id ?: "") }) {
-                                        Icon(Icons.Default.Delete, contentDescription = "Delete")
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                    ) {
+                                        IconButton(onClick = { onDeleteEvent(event.id ?: "") }) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = "Delete"
+                                            )
+                                        }
                                     }
                                 }
-                            }
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 20.dp, vertical = 12.dp)
-                            ) {
-                                Text(
-                                    text = event.title,
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                if (event.description.isNotEmpty()) {
-                                    Text(
-                                        text = event.description,
-                                        fontSize = 14.sp,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        color = Color.Gray,
-                                        modifier = Modifier.padding(top = 4.dp)
-                                    )
-                                }
-                                Box(
+                                Column(
                                     modifier = Modifier
-                                        .align(Alignment.End)
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 20.dp, vertical = 12.dp)
                                 ) {
                                     Text(
-                                        text = "Tap to view details",
-                                        fontSize = 12.sp,
-                                        color = MaterialTheme.colorScheme.primary
+                                        text = event.title,
+                                        fontSize = 22.sp,
+                                        fontWeight = FontWeight.SemiBold
                                     )
+                                    if (event.description.isNotEmpty()) {
+                                        Text(
+                                            text = event.description,
+                                            fontSize = 14.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            color = Color.Gray,
+                                            modifier = Modifier.padding(top = 4.dp)
+                                        )
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.End)
+                                    ) {
+                                        Text(
+                                            text = "Tap to view details",
+                                            fontSize = 12.sp,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -329,7 +350,6 @@ fun EventCards(
             }
         }
     }
-}
 }
 
 @Composable

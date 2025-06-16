@@ -45,7 +45,9 @@ import java.util.*
 import com.io.eventer.R
 import com.io.eventer.ui.theme.EventerTheme
 import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.postgrest.from
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -88,12 +90,12 @@ fun Profile(navController: NavController) {
             }
         },
     ) { innerPadding ->
-        ProfileContent(navController, Modifier.padding(innerPadding))
+        ProfileContent(navController, Modifier.padding(innerPadding),viewModel = hiltViewModel())
     }
 }
 
 @Composable
-fun ProfileContent(navController: NavController, modifier: Modifier = Modifier) {
+fun ProfileContent(navController: NavController, modifier: Modifier = Modifier,viewModel: ProfileViewModel) {
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     Column(
@@ -104,7 +106,7 @@ fun ProfileContent(navController: NavController, modifier: Modifier = Modifier) 
                 selectedImageUri = uri
             }
         )
-        WelcomeText()
+        WelcomeText(viewModel = viewModel)
         ProfileMenuItems(navController)
     }
 }
@@ -195,15 +197,15 @@ fun ProfileHeader(onImageSelected: (Uri) -> Unit) {
 }
 
 @Composable
-fun WelcomeText() {
-    val supabase : SupabaseClient
+fun WelcomeText(viewModel: ProfileViewModel) {
+    val username by viewModel.username.collectAsState()
     Box(
         contentAlignment = Alignment.Center, modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 16.dp)
     ) {
         Text(
-            text = "Hello! What Brings You here?",
+            text = "Hello $username! What Brings You here?",
             fontSize = 26.sp,
             fontFamily = firasans,
             fontWeight = FontWeight.Medium
@@ -214,7 +216,6 @@ fun WelcomeText() {
 @Composable
 fun ProfileMenuItems(navController: NavController) {
     val context = LocalContext.current
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -265,9 +266,7 @@ fun ProfileMenuItems(navController: NavController) {
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
-
         ElevatedCard(modifier = Modifier.padding(horizontal = 20.dp)) {
-
             ProfileMenuItem(
                 iconResId = R.drawable.share,
                 title = "Share",
@@ -276,18 +275,15 @@ fun ProfileMenuItems(navController: NavController) {
                         type = "text/plain"
                         putExtra(Intent.EXTRA_TEXT, "Check out this awesome Event!")
                     }
-
                     val chooserIntent = Intent.createChooser(
                         shareIntent,
                         "Share via"
                     )
-
                     ContextCompat.startActivity(context, chooserIntent, null)
                 }
             )
         }
     }
-
 }
 
 @Composable

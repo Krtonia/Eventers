@@ -42,6 +42,12 @@ class EventViewModel @Inject constructor(
         checkAuthStatus()
     }
 
+    fun refreshEvents() {
+        viewModelScope.launch {
+            fetchEvents()
+        }
+    }
+
     private fun checkAuthStatus() {
         viewModelScope.launch {
             try {

@@ -113,6 +113,9 @@ dependencies {
     implementation(libs.supabase.postgrest.kt)
     implementation(libs.auth.kt)
 
+    //Swipe To Refresh
+    implementation (libs.accompanist.swiperefresh)
+
     // Ktor
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.android)

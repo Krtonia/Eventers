@@ -1,5 +1,6 @@
 [versions]
 accompanistPermissions = "0.34.0"
+accompanistSwiperefresh = "0.24.13-rc"
 agp = "8.9.1"
 barcodeScanning = "17.2.0"
 bom = "3.1.1"
@@ -39,6 +40,7 @@ securityCrypto = "1.1.0-alpha06"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
+accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanistSwiperefresh" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "cameraCamera2" }
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
