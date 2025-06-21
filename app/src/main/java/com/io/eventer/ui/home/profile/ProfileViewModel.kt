@@ -5,9 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.io.eventer.ui.auth.components.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -31,7 +28,8 @@ class ProfileViewModel @Inject constructor(
     private fun fetchUserProfile() {
         val currentUser = authRepository.getCurrentUser()
         if (currentUser != null) {
-            _username.value = currentUser.email.toString()
+            _username.value = currentUser.userMetadata?.get("name")?.toString()?.removeSurrounding("\"")
+                ?: currentUser.email.toString()
         }
     }
 
