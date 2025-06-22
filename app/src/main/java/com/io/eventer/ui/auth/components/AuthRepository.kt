@@ -29,10 +29,22 @@ class AuthRepository @Inject constructor(private val supabase: SupabaseClient) {
         }
     }
 
+    fun updateEmail(newEmail: String): Flow<AuthState> = flow {
+        emit(AuthState.Loading)
+        try {
+            supabase.auth.updateUser {
+                email = newEmail
+            }
+            emit(AuthState.Success)
+        } catch (e: Exception) {
+            emit(AuthState.Error(e.localizedMessage ?: "Failed to update useremail"))
+        }
+    }
+
     fun updateUsername(newUsername: String): Flow<AuthState> = flow {
         emit(AuthState.Loading)
         try {
-            val userData = JsonObject(mapOf("username" to JsonPrimitive(newUsername)))
+            val userData = JsonObject(mapOf("name" to JsonPrimitive(newUsername)))
             supabase.auth.updateUser {
                 data = userData
             }

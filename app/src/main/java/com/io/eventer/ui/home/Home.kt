@@ -146,7 +146,7 @@ fun TopAppBarContent() {
     TopAppBar(
         title = {
             Text(
-                modifier = Modifier.padding(horizontal = 5.dp, vertical = 5.dp),
+                modifier = Modifier.padding(horizontal = 5.dp, vertical = 8.dp),
                 text = "Welcome",
                 fontSize = 42.sp,
                 fontFamily = firasans,

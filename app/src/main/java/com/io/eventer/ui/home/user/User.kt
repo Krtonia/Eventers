@@ -3,7 +3,6 @@ package com.io.eventer.ui.home.user
 import android.annotation.SuppressLint
 import android.util.Patterns
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,17 +15,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.io.eventer.ui.theme.firasans
-import com.io.eventer.R
+import com.io.eventer.ui.home.profile.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -38,11 +36,10 @@ fun User(navController: NavController) {
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
-                    modifier = Modifier.height(110.dp),
                     title = {
-                        Text(
+                        Text(modifier = Modifier.padding(horizontal = 5.dp, vertical = 8.dp),
                             text = "User Screen",
-                            fontSize = 32.sp,
+                            fontSize = 42.sp,
                             fontFamily = firasans,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -55,24 +52,21 @@ fun User(navController: NavController) {
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                UserContent(navController)
+                UserContent(viewModel = hiltViewModel())
             }
         }
     }
 }
 
 @Composable
-fun UserContent(navController: NavController) {
-    // State for user information with error tracking
-    var userName by remember { mutableStateOf(TextFieldValue("")) }
-    var name by remember { mutableStateOf(TextFieldValue("")) }
-    var surname by remember { mutableStateOf(TextFieldValue("")) }
-    var email by remember { mutableStateOf(TextFieldValue("")) }
+fun UserContent(viewModel: ProfileViewModel) {
+
+    // Local state for editing (separate from ViewModel)
+    var userName by remember { mutableStateOf("") }
+    var userEmail by remember { mutableStateOf("") }
 
     // State for error messages
     var userNameError by remember { mutableStateOf<String?>(null) }
-    var nameError by remember { mutableStateOf<String?>(null) }
-    var surnameError by remember { mutableStateOf<String?>(null) }
     var emailError by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
@@ -86,8 +80,7 @@ fun UserContent(navController: NavController) {
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 16.dp),
+                .fillMaxWidth().padding(top = 4.dp, bottom = 15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -96,7 +89,6 @@ fun UserContent(navController: NavController) {
                 tint = Color.White,
                 modifier = Modifier.padding(end = 8.dp)
             )
-
             Text(
                 text = "Update your personal information",
                 color = Color.White,
@@ -107,46 +99,22 @@ fun UserContent(navController: NavController) {
         UserInfoTextField(
             label = "User Name",
             textValue = userName,
-            onValueChange = {
-                userName = it
-                userNameError = validateUsername(it.text)
+            onValueChange = { newValue ->
+                userName = newValue
+                userNameError = validateUsername(newValue)
             },
             errorMessage = userNameError,
             modifier = Modifier.padding(bottom = 16.dp),
             labelColor = if (isSystemInDarkTheme()) Color.White else Color.Black
         )
-        UserInfoTextField(
-            label = "Name",
-
-            textValue = name,
-            onValueChange = {
-                name = it
-                nameError = validateName(it.text)
-            },
-            errorMessage = nameError,
-            labelColor = if (isSystemInDarkTheme()) Color.White else Color.Black,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        UserInfoTextField(
-            label = "Surname",
-            labelColor = if (isSystemInDarkTheme()) Color.White else Color.Black,
-            textValue = surname,
-            onValueChange = {
-                surname = it
-                surnameError = validateSurname(it.text)
-            },
-            errorMessage = surnameError,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
 
         UserInfoTextField(
             label = "Email",
             labelColor = if (isSystemInDarkTheme()) Color.White else Color.Black,
-            textValue = email,
-            onValueChange = {
-                email = it
-                emailError = validateEmail(it.text)
+            textValue = userEmail, // Use local state
+            onValueChange = { newValue ->
+                userEmail = newValue // Update local state only
+                emailError = validateEmail(newValue)
             },
             errorMessage = emailError,
             modifier = Modifier.padding(bottom = 16.dp)
@@ -154,27 +122,21 @@ fun UserContent(navController: NavController) {
 
         Button(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
-                .height(55.dp),
+                .padding(vertical = 16.dp)
+                .height(55.dp).align(Alignment.CenterHorizontally),
             onClick = {
                 // Validate everything
-                userNameError = validateUsername(userName.text)
-                nameError = validateName(name.text)
-                surnameError = validateSurname(surname.text)
-                emailError = validateEmail(email.text)
+                userNameError = validateUsername(userName)
+                emailError = validateEmail(userEmail)
 
                 // Check for errors
-                val hasErrors = listOf(userNameError, nameError, surnameError, emailError)
+                val hasErrors = listOf(userNameError, emailError)
                     .any { it != null }
 
                 if (!hasErrors) {
-                    saveUserInformation(
-                        userName.text,
-                        name.text,
-                        surname.text,
-                        email.text
-                    )
+                    // Only update Save is clicked
+                    viewModel.updateUsername(userName)
+                    viewModel.updateEmail(userEmail)
 
                     Toast.makeText(
                         context,
@@ -190,9 +152,6 @@ fun UserContent(navController: NavController) {
                     ).show()
                 }
             },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF82C8E5)
-            )
         ) {
             Text(
                 text = "Save",
@@ -202,7 +161,6 @@ fun UserContent(navController: NavController) {
                 fontSize = 18.sp
             )
         }
-
         Spacer(modifier = Modifier.height(32.dp))
     }
 }
@@ -211,8 +169,8 @@ fun UserContent(navController: NavController) {
 fun UserInfoTextField(
     label: String,
     labelColor: Color,
-    textValue: TextFieldValue,
-    onValueChange: (TextFieldValue) -> Unit,
+    textValue: String,
+    onValueChange: (String) -> Unit,
     errorMessage: String? = null,
     @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
@@ -223,7 +181,7 @@ fun UserInfoTextField(
             fontWeight = FontWeight.Medium,
             fontFamily = firasans,
             color = labelColor,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(vertical = 8.dp)
         )
 
         OutlinedTextField(
@@ -267,26 +225,6 @@ fun validateUsername(username: String): String? {
     }
 }
 
-fun validateName(name: String): String? {
-    return when {
-        name.isBlank() -> "Name cannot be empty"
-        name.length < 2 -> "Name must be at least 2 characters long"
-        name.length > 50 -> "Name cannot exceed 50 characters"
-        !name.matches(Regex("^[a-zA-Z]+$")) -> "Name can only contain letters"
-        else -> null
-    }
-}
-
-fun validateSurname(surname: String): String? {
-    return when {
-        surname.isBlank() -> "Surname cannot be empty"
-        surname.length < 2 -> "Surname must be at least 2 characters long"
-        surname.length > 50 -> "Surname cannot exceed 50 characters"
-        !surname.matches(Regex("^[a-zA-Z]+$")) -> "Surname can only contain letters"
-        else -> null
-    }
-}
-
 fun validateEmail(email: String): String? {
     return when {
         email.isBlank() -> "Email cannot be empty"
@@ -298,14 +236,10 @@ fun validateEmail(email: String): String? {
 
 fun saveUserInformation(
     userName: String,
-    name: String,
-    surname: String,
     email: String
 ) {
     // TODO: Implement your saving mechanism
     println("Saving User Information:")
     println("Username: $userName")
-    println("Name: $name")
-    println("Surname: $surname")
     println("Email: $email")
 }
