@@ -26,6 +26,9 @@ class ProfileViewModel @Inject constructor(
     private val _useremail = MutableStateFlow("")
     val useremail: StateFlow<String> get() = _useremail
 
+    private val _emailUpdateState = MutableStateFlow<AuthState>(AuthState.Idle)
+    val emailUpdateState: StateFlow<AuthState> get() = _emailUpdateState
+
     init {
         fetchUserProfile()
     }
@@ -62,12 +65,24 @@ class ProfileViewModel @Inject constructor(
 
     fun updateEmail(newEmail: String) {
         viewModelScope.launch {
-            authRepository.updateUsername(newEmail).collect { state ->
+            authRepository.updateEmail(newEmail).collect { state ->
+                _emailUpdateState.value = state
+            }
+        }
+    }
+
+    fun getCurrentEmail(): String {
+        return authRepository.getCurrentUser()?.email ?: ""
+    }
+
+    /*fun updateEmail(newEmail: String) {
+        viewModelScope.launch {
+            authRepository.updateEmail(newEmail).collect { state ->
                 when (state) {
                     is AuthState.Loading -> _isLoading.value = true
                     is AuthState.Success -> {
                         _isLoading.value = false
-                        _username.value = newEmail
+                        _useremail.value = newEmail
                     }
                     is AuthState.Error -> {
                         _isLoading.value = false
@@ -77,7 +92,7 @@ class ProfileViewModel @Inject constructor(
                 }
             }
         }
-    }
+    }*/
 
     fun setProfileImage(uri: Uri?) {
         _profileImageUri.value = uri

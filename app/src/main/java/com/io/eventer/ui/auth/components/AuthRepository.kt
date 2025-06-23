@@ -35,7 +35,7 @@ class AuthRepository @Inject constructor(private val supabase: SupabaseClient) {
             supabase.auth.updateUser {
                 email = newEmail
             }
-            emit(AuthState.Success)
+            emit(AuthState.EmailUpdateSent)
         } catch (e: Exception) {
             emit(AuthState.Error(e.localizedMessage ?: "Failed to update useremail"))
         }
@@ -69,7 +69,7 @@ class AuthRepository @Inject constructor(private val supabase: SupabaseClient) {
         }
     }
 
-    //Function to get CurrentUser details
+    // CurrentUser details
     fun getCurrentUser(): UserInfo? {
         return try {
             supabase.auth.currentUserOrNull()

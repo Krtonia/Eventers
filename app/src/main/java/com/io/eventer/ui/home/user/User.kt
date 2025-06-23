@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.io.eventer.ui.auth.components.AuthState
 import com.io.eventer.ui.theme.firasans
 import com.io.eventer.ui.home.profile.ProfileViewModel
 
@@ -58,7 +59,7 @@ fun User(navController: NavController) {
     }
 }
 
-@Composable
+/*@Composable
 fun UserContent(viewModel: ProfileViewModel) {
 
     // Local state for editing (separate from ViewModel)
@@ -111,9 +112,9 @@ fun UserContent(viewModel: ProfileViewModel) {
         UserInfoTextField(
             label = "Email",
             labelColor = if (isSystemInDarkTheme()) Color.White else Color.Black,
-            textValue = userEmail, // Use local state
+            textValue = userEmail,
             onValueChange = { newValue ->
-                userEmail = newValue // Update local state only
+                userEmail = newValue
                 emailError = validateEmail(newValue)
             },
             errorMessage = emailError,
@@ -155,6 +156,192 @@ fun UserContent(viewModel: ProfileViewModel) {
         ) {
             Text(
                 text = "Save",
+                fontFamily = firasans,
+                color = Color.Black,
+                fontWeight = FontWeight.Medium,
+                fontSize = 18.sp
+            )
+        }
+        Spacer(modifier = Modifier.height(32.dp))
+    }
+}*/
+
+@Composable
+fun UserContent(viewModel: ProfileViewModel) {
+
+    val initialUserName by viewModel.username.collectAsState()
+    val emailUpdateState by viewModel.emailUpdateState.collectAsState()
+
+    var userName by remember { mutableStateOf("") }
+    var userEmail by remember { mutableStateOf("") }
+
+    var userNameError by remember { mutableStateOf<String?>(null) }
+    var emailError by remember { mutableStateOf<String?>(null) }
+
+    val context = LocalContext.current
+
+    LaunchedEffect(emailUpdateState) {
+        when (emailUpdateState) {
+            is AuthState.EmailUpdateSent -> {
+                Toast.makeText(
+                    context,
+                    "Confirmation email sent! Check your inbox to verify new email.",
+                    Toast.LENGTH_LONG
+                ).show()
+                userEmail = ""
+            }
+            is AuthState.Error -> {
+                Toast.makeText(
+                    context,
+                    "Error: ${(emailUpdateState as AuthState.Error).message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            else -> {}
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp),
+        horizontalAlignment = Alignment.Start
+    ) {
+        // Current credentials
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Gray.copy(alpha = 0.15f))
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Current Credentials:",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "Username: $initialUserName",
+                    color = Color.White.copy(alpha = 0.75f),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = "Email: ${viewModel.getCurrentEmail()}",
+                    color = Color.White.copy(alpha = 0.75f),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+
+        // warning card
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFA500).copy(alpha = 0.2f))
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "⚠️ Email Update Notice:",
+                    color = Color.Red,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = "Changing email requires verification. You'll receive a confirmation email. Use your OLD email to login until you confirm the new one. Clicking the change email button in mail will change mail ",
+                    color = Color.White.copy(alpha = 0.9f),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth().padding(top = 4.dp, bottom = 15.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = "Info",
+                tint = Color.White,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+            Text(
+                text = "Enter new information",
+                color = Color.White,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        UserInfoTextField(
+            label = "New User Name",
+            textValue = userName,
+            onValueChange = { newValue: String ->
+                userName = newValue
+                userNameError = validateUsername(newValue)
+            },
+            errorMessage = userNameError,
+            modifier = Modifier.padding(bottom = 16.dp),
+            labelColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+        )
+
+        UserInfoTextField(
+            label = "New Email",
+            labelColor = if (isSystemInDarkTheme()) Color.White else Color.Black,
+            textValue = userEmail,
+            onValueChange = { newValue: String ->
+                userEmail = newValue
+                emailError = validateEmail(newValue)
+            },
+            errorMessage = emailError,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Button(
+            modifier = Modifier
+                .padding(vertical = 16.dp)
+                .height(55.dp).align(Alignment.CenterHorizontally),
+            onClick = {
+                // Validate everything
+                userNameError = if (userName.isNotEmpty()) validateUsername(userName) else null
+                emailError = if (userEmail.isNotEmpty()) validateEmail(userEmail) else null
+
+                val hasErrors = listOf(userNameError, emailError).any { it != null }
+
+                if (!hasErrors) {
+                    // Update username
+                    if (userName.isNotEmpty()) {
+                        viewModel.updateUsername(userName)
+                        userName = ""
+                        Toast.makeText(
+                            context,
+                            "Username updated successfully!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    // Update email
+                    if (userEmail.isNotEmpty()) {
+                        viewModel.updateEmail(userEmail)
+                    }
+
+                } else {
+                    Toast.makeText(
+                        context,
+                        "Please correct the errors in the form",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            },
+        ) {
+            Text(
+                text = "Update",
                 fontFamily = firasans,
                 color = Color.Black,
                 fontWeight = FontWeight.Medium,
