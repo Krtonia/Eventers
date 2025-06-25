@@ -272,7 +272,7 @@ fun EventDetail(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-                            text = "Created: ${event.createdAt.split("T")[0]}",
+                            text = "Created: ",
                             fontSize = 14.sp,
                             color = Color.Gray
                         )

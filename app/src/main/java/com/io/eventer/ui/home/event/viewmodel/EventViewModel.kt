@@ -23,6 +23,8 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 import java.util.Random
+import java.time.Instant
+import java.util.TimeZone
 import javax.inject.Inject
 
 @HiltViewModel
@@ -120,9 +122,11 @@ class EventViewModel @Inject constructor(
                     return@launch
                 }
 
-                val dateFormat =
-                    SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.getDefault())
+                dateFormat.timeZone = TimeZone.getTimeZone("UTC")
                 val formattedDate = dateFormat.format(Date())
+
+                val timestamp = System.currentTimeMillis()
 
                 // Generate a random 6-digit code
                 val eventCode = generateSixDigitCode()
@@ -132,9 +136,9 @@ class EventViewModel @Inject constructor(
                     title = title,
                     description = description,
                     imageUrl = imageUrl,
-                    createdAt = formattedDate,
                     user_id = userId,
                     code = eventCode,
+                    createdAt = formattedDate,
                 )
 
                 Log.d("EventViewModel", "Creating event: $newEvent")

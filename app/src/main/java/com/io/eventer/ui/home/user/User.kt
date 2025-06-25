@@ -38,7 +38,8 @@ fun User(navController: NavController) {
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(modifier = Modifier.padding(horizontal = 5.dp, vertical = 8.dp),
+                        Text(
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 8.dp),
                             text = "User Screen",
                             fontSize = 42.sp,
                             fontFamily = firasans,
@@ -190,6 +191,7 @@ fun UserContent(viewModel: ProfileViewModel) {
                 ).show()
                 userEmail = ""
             }
+
             is AuthState.Error -> {
                 Toast.makeText(
                     context,
@@ -197,6 +199,7 @@ fun UserContent(viewModel: ProfileViewModel) {
                     Toast.LENGTH_SHORT
                 ).show()
             }
+
             else -> {}
         }
     }
@@ -242,19 +245,19 @@ fun UserContent(viewModel: ProfileViewModel) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFA500).copy(alpha = 0.2f))
+            colors = CardDefaults.cardColors(containerColor = Color.Gray.copy(alpha = 0.15f))
         ) {
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
                 Text(
-                    text = "⚠️ Email Update Notice:",
+                    text = "⚠️ Regarding Email Update:",
                     color = Color.Red,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(
-                    text = "Changing email requires verification. You'll receive a confirmation email. Use your OLD email to login until you confirm the new one. Clicking the change email button in mail will change mail ",
+                    text = "Changing email requires verification. You'll receive a confirmation email. Use your OLD email to login until you confirm the new one. Clicking the change email button in mail will change email ",
                     color = Color.White.copy(alpha = 0.9f),
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -263,7 +266,8 @@ fun UserContent(viewModel: ProfileViewModel) {
 
         Row(
             modifier = Modifier
-                .fillMaxWidth().padding(top = 4.dp, bottom = 15.dp),
+                .fillMaxWidth()
+                .padding(top = 4.dp, bottom = 15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -306,9 +310,10 @@ fun UserContent(viewModel: ProfileViewModel) {
         Button(
             modifier = Modifier
                 .padding(vertical = 16.dp)
-                .height(55.dp).align(Alignment.CenterHorizontally),
+                .height(55.dp)
+                .align(Alignment.CenterHorizontally),
             onClick = {
-                // Validate everything
+                // Validate (can't still verify if the email entered exists or not)
                 userNameError = if (userName.isNotEmpty()) validateUsername(userName) else null
                 emailError = if (userEmail.isNotEmpty()) validateEmail(userEmail) else null
 
@@ -344,7 +349,7 @@ fun UserContent(viewModel: ProfileViewModel) {
                 text = "Update",
                 fontFamily = firasans,
                 color = Color.Black,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.SemiBold,
                 fontSize = 18.sp
             )
         }
@@ -385,7 +390,9 @@ fun UserInfoTextField(
                 )
             },
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = if (errorMessage != null) Color.Red else Color.White.copy(alpha = 0.5f),
+                unfocusedBorderColor = if (errorMessage != null) Color.Red else Color.White.copy(
+                    alpha = 0.5f
+                ),
                 focusedBorderColor = if (errorMessage != null) Color.Red else Color.White
             ),
             isError = errorMessage != null

@@ -1,6 +1,7 @@
 package com.io.eventer.ui.home
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,7 +13,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -29,6 +29,7 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -38,6 +39,9 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.io.eventer.R
 import com.io.eventer.model.Event
 import com.io.eventer.ui.home.event.viewmodel.EventViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -48,7 +52,7 @@ fun Home(navController: NavController, viewModel: EventViewModel = hiltViewModel
 
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) },
-        topBar = { TopAppBarContent() },
+        topBar = { Surface(shadowElevation = 50.dp) { TopAppBarContent() } },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 elevation = FloatingActionButtonDefaults.elevation(12.dp),
@@ -201,6 +205,8 @@ fun EventCards(
     onDeleteEvent: (String) -> Unit
 ) {
     var isRefreshing by remember { mutableStateOf(false) }
+    val groupedEvents = groupByDate(events)
+
     Column(
         modifier = Modifier.padding(top = 60.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -209,7 +215,6 @@ fun EventCards(
         Spacer(modifier = Modifier.height(9.dp))
         SwipeRefresh(
             modifier = Modifier.fillMaxSize(1f),
-
             state = rememberSwipeRefreshState(isRefreshing),
             onRefresh = {
                 isRefreshing = true
@@ -245,102 +250,125 @@ fun EventCards(
                 }
             } else {
                 LazyColumn {
-                    items(events) { event ->
-                        ElevatedCard(
-                            onClick = {
-                                event.id?.let { id ->
-                                    if (id.isNotBlank()) {
-                                        onEventClick(id)
-                                    }
-                                }
-                            },
-                            modifier = Modifier
-                                .padding(top = 20.dp)
-                                .padding(vertical = 10.dp, horizontal = 20.dp)
-                                .height(250.dp),
-                            elevation = CardDefaults.cardElevation(8.dp),
-                            shape = RoundedCornerShape(22.dp)
-                        ) {
-                            Column {
-                                Box(
+                    for ((date, eventsInGroup) in groupedEvents) {
+                        item {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = date,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(180.dp)
-                                        .clickable {
-                                            event.id?.let { id ->
-                                                if (id.isNotBlank()) {
-                                                    onImageClick(id)
+                                        .padding(top = 30.dp, bottom = 10.dp)
+                                )
+                            }
+                        }
+                        items(eventsInGroup) { event ->
+                            ElevatedCard(
+                                onClick = {
+                                    event.id?.let { id ->
+                                        if (id.isNotBlank()) {
+                                            onEventClick(id)
+                                        }
+                                    }
+                                },
+                                modifier = Modifier
+                                    .padding(horizontal = 20.dp)
+                                    .height(250.dp),
+                                elevation = CardDefaults.cardElevation(8.dp),
+                                shape = RoundedCornerShape(22.dp)
+                            ) {
+                                Column {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(180.dp)
+                                            .clickable {
+                                                event.id?.let { id ->
+                                                    if (id.isNotBlank()) {
+                                                        onImageClick(id)
+                                                    }
                                                 }
                                             }
+                                    ) {
+                                        GlideImage(
+                                            model = event.imageUrl,
+                                            contentDescription = "Event Image (Tap to change)",
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.fillMaxSize()
+                                        ) { requestBuilder ->
+                                            requestBuilder
+                                                .placeholder(R.drawable.placeholder)
+                                                .error(R.drawable.placeholder)
                                         }
-                                ) {
-                                    GlideImage(
-                                        model = event.imageUrl,
-                                        contentDescription = "Event Image (Tap to change)",
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxSize()
-                                    ) { requestBuilder ->
-                                        requestBuilder
-                                            .placeholder(R.drawable.placeholder)
-                                            .error(R.drawable.placeholder)
-                                    }
-                                    Box(
-                                        modifier = Modifier
-                                            .align(Alignment.BottomEnd)
-                                            .padding(8.dp)
-                                            .background(
-                                                color = Color.Black.copy(alpha = 0.6f),
-                                                shape = RoundedCornerShape(4.dp)
-                                            )
-                                    ) {
-                                        Text(
-                                            text = "Tap to change image",
-                                            color = Color.White,
-                                            fontSize = 12.sp,
-                                            modifier = Modifier.padding(4.dp)
-                                        )
-                                    }
-                                    Box(
-                                        modifier = Modifier
-                                            .align(Alignment.TopEnd)
-                                    ) {
-                                        IconButton(onClick = { onDeleteEvent(event.id ?: "") }) {
-                                            Icon(
-                                                Icons.Default.Delete,
-                                                contentDescription = "Delete"
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.BottomEnd)
+                                                .padding(8.dp)
+                                                .background(
+                                                    color = Color.Black.copy(alpha = 0.6f),
+                                                    shape = RoundedCornerShape(4.dp)
+                                                )
+                                        ) {
+                                            Text(
+                                                text = "Tap to change image",
+                                                color = Color.White,
+                                                fontSize = 12.sp,
+                                                modifier = Modifier.padding(4.dp)
                                             )
                                         }
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.TopEnd)
+                                        ) {
+                                            IconButton(onClick = {
+                                                onDeleteEvent(
+                                                    event.id ?: ""
+                                                )
+                                            }) {
+                                                Icon(
+                                                    Icons.Default.Delete,
+                                                    contentDescription = "Delete"
+                                                )
+                                            }
+                                        }
                                     }
-                                }
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 20.dp, vertical = 12.dp)
-                                ) {
-                                    Text(
-                                        text = event.title,
-                                        fontSize = 22.sp,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                    if (event.description.isNotEmpty()) {
-                                        Text(
-                                            text = event.description,
-                                            fontSize = 14.sp,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                            color = Color.Gray,
-                                            modifier = Modifier.padding(top = 4.dp)
-                                        )
-                                    }
-                                    Box(
+                                    Column(
                                         modifier = Modifier
-                                            .align(Alignment.End)
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 20.dp, vertical = 12.dp)
                                     ) {
                                         Text(
-                                            text = "Tap to view details",
-                                            fontSize = 12.sp,
-                                            color = MaterialTheme.colorScheme.primary
+                                            text = event.title,
+                                            fontSize = 22.sp,
+                                            fontWeight = FontWeight.SemiBold
                                         )
+                                        if (event.description.isNotEmpty()) {
+                                            Text(
+                                                text = event.description,
+                                                fontSize = 14.sp,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
+                                                color = Color.Gray,
+                                                modifier = Modifier.padding(top = 4.dp)
+                                            )
+                                        }
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.End)
+                                        ) {
+                                            Text(
+                                                text = "Tap to view details",
+                                                fontSize = 12.sp,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -349,6 +377,32 @@ fun EventCards(
                 }
             }
         }
+    }
+}
+
+fun groupByDate(events: List<Event>): Map<String, List<Event>> {
+    return events.groupBy { event ->
+        try {
+            formatDate(event.createdAt)
+        } catch (e: Exception) {
+            "Unknown Date"
+        }
+    }
+}
+
+fun formatDate(dateString: String): String {
+    return try {
+        val inputFormat = if (dateString.contains('T')) {
+            SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        } else {
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        }
+        val outputFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+        val date = inputFormat.parse(dateString.substring(0, 19))
+        outputFormat.format(date ?: Date())
+    } catch (e: Exception) {
+        Log.e("DateFormat", "Error parsing date: $dateString", e)
+        "Unknown Date"
     }
 }
 
