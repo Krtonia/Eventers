@@ -69,6 +69,16 @@ class AuthRepository @Inject constructor(private val supabase: SupabaseClient) {
         }
     }
 
+    fun sendPasswordResetEmail(emailValue: String): Flow<AuthState> = flow {
+        emit(AuthState.Loading)
+        try {
+            supabase.auth.resetPasswordForEmail(emailValue)
+            emit(AuthState.PasswordResetEmailSent)
+        } catch (e: Exception) {
+            emit(AuthState.Error(e.localizedMessage ?: "Failed to send password reset email"))
+        }
+    }
+
     // CurrentUser details
     fun getCurrentUser(): UserInfo? {
         return try {

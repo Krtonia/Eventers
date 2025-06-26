@@ -29,6 +29,9 @@ class AuthViewModel @Inject constructor(
     var loginMessage by mutableStateOf<String?>(null)
         private set
 
+    var passwordResetMessage by mutableStateOf<String?>(null)
+        private set
+
     fun register(name: String, email: String, password: String) {
         registrationMessage = null
         authState = AuthState.Loading
@@ -59,9 +62,29 @@ class AuthViewModel @Inject constructor(
             }.launchIn(viewModelScope)
     }
 
+    fun sendPasswordResetEmail(email: String) {
+        passwordResetMessage = null
+        authState = AuthState.Loading
+
+        authRepository.sendPasswordResetEmail(email)
+            .onEach { state ->
+                authState = state
+                when (state) {
+                    is AuthState.PasswordResetEmailSent -> {
+                        passwordResetMessage = "Password reset email sent successfully!"
+                    }
+                    is AuthState.Error -> {
+                        passwordResetMessage = state.message
+                    }
+                    else -> {}
+                }
+            }.launchIn(viewModelScope)
+    }
+
     fun resetMessages() {
         registrationMessage = null
         loginMessage = null
+        passwordResetMessage = null
     }
 
     fun isUserLoggedIn(): Boolean {
