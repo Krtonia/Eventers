@@ -87,6 +87,10 @@ class AuthViewModel @Inject constructor(
         passwordResetMessage = null
     }
 
+    fun resetToIdle() {
+        authState = AuthState.Idle
+    }
+
     fun isUserLoggedIn(): Boolean {
         try {
             val user = client.auth.currentUserOrNull()

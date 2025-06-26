@@ -12,4 +12,5 @@ object Routes
     val eigth = "Help"
     val nineth = "User"
     val tenth = "EventDetail"
+    val eleventh = "PasswordReset"
 }

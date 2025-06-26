@@ -14,6 +14,7 @@ import com.io.eventer.ui.home.options.Options
 import com.io.eventer.ui.home.profile.Profile
 import com.io.eventer.ui.home.user.User
 import com.io.eventer.ui.Welcome
+import com.io.eventer.ui.auth.PasswordReset
 import com.io.eventer.ui.auth.SignUp
 import com.io.eventer.ui.home.event.EventDetail
 import io.github.jan.supabase.SupabaseClient
@@ -35,5 +36,6 @@ fun Navigation() {
             val eventId = backStackEntry.arguments?.getString("eventId")
             EventDetail(navController, eventId)
         }
+        composable(Routes.eleventh){ PasswordReset(navController) }
     }
 }

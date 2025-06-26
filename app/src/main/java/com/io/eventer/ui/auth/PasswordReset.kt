@@ -6,7 +6,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -41,51 +39,34 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.io.eventer.R
-import com.io.eventer.navigation.Routes
 import com.io.eventer.ui.auth.viewmodel.AuthViewModel
 import com.io.eventer.ui.auth.components.AuthState
 import com.io.eventer.ui.theme.firasans
 
 @Composable
-fun SignIn(navController: NavController) {
+fun PasswordReset(navController: NavController) {
     val viewModel: AuthViewModel = hiltViewModel()
     val state = viewModel.authState
     val context = LocalContext.current
-    val loginMessage = viewModel.loginMessage
+    val passwordResetMessage = viewModel.passwordResetMessage
 
-    LaunchedEffect(Unit) {
-        if (viewModel.isUserLoggedIn()) {
-            navController.navigate(Routes.fourth) {
-                popUpTo(Routes.second) { inclusive = true }
-            }
-        }
-    }
-
-    LaunchedEffect(loginMessage) {
-        loginMessage?.let {
+    LaunchedEffect(passwordResetMessage) {
+        passwordResetMessage?.let {
             Toast.makeText(context, it, Toast.LENGTH_LONG).show()
-            //Login successful navigate to home
-            if (it.contains("successful")) {
-                navController.navigate(Routes.fourth) {
-                    popUpTo(Routes.second) { inclusive = true }
-                }
-                viewModel.resetMessages()
-            }
+            viewModel.resetMessages()
         }
     }
 
-    LaunchedEffect(viewModel.passwordResetMessage) {
-        viewModel.passwordResetMessage?.let { message ->
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-            viewModel.resetMessages()
+    LaunchedEffect(state) {
+        if (state is AuthState.PasswordResetEmailSent) {
+            kotlinx.coroutines.delay(100)
+            viewModel.resetToIdle()
         }
     }
 
@@ -96,7 +77,6 @@ fun SignIn(navController: NavController) {
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
-
 
         if (state is AuthState.Loading) {
             Box(
@@ -110,37 +90,43 @@ fun SignIn(navController: NavController) {
             }
         } else {
             Column(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(
-                    modifier = Modifier,
-                    text = "Hello !",
-                    fontFamily = firasans,
-                    color = Color.White,
-                    fontSize = 34.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Right
-                )
+                Spacer(modifier = Modifier.height(32.dp))
 
                 Text(
-                    modifier = Modifier,
-                    text = "Welcome back to Eventers",
+                    text = "Reset Password",
                     fontFamily = firasans,
                     color = Color.White,
-                    fontSize = 32.sp,
+                    fontSize = 45.sp,
                     fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Right
+                    textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(60.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Enter your email address and we'll send you a link to reset your password",
+                    fontFamily = firasans,
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+
+                Spacer(modifier = Modifier.height(48.dp))
 
                 var email by remember { mutableStateOf("") }
                 var isTouched by remember { mutableStateOf(false) }
                 val isEmailValid = Patterns.EMAIL_ADDRESS.matcher(email).matches()
+
                 TextField(
-                    modifier = Modifier.fillMaxWidth(0.8f),
+                    modifier = Modifier.fillMaxWidth(),
                     value = email,
                     shape = RoundedCornerShape(12.dp),
                     onValueChange = {
@@ -196,89 +182,18 @@ fun SignIn(navController: NavController) {
                     ),
                 )
 
-                Spacer(modifier = Modifier.height(14.dp))
-
-                var password by remember { mutableStateOf("") }
-                var passwordVisible by remember { mutableStateOf(false) }
-                val isPasswordInvalid = password.isNotBlank() && password.length < 6
-                TextField(
-                    modifier = Modifier.fillMaxWidth(0.8f),
-                    value = password,
-                    shape = RoundedCornerShape(12.dp),
-                    onValueChange = {
-                        password = it
-                        isTouched = true
-                    },
-                    placeholder = {
-                        Text(
-                            text = "Password",
-                            lineHeight = 15.sp,
-                            color = Color(0xFFD9D9D9)
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.lock),
-                            contentDescription = "password lock icon",
-                            tint = Color.White
-                        )
-                    },
-                    trailingIcon = {
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(
-                                painter = painterResource(R.drawable.eye), tint = Color.White,
-                                contentDescription = if (passwordVisible) "Hide password" else "Show password"
-                            )
-                        }
-                    },
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    isError = isTouched && isPasswordInvalid,
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color(0xFF313E55),
-                        unfocusedContainerColor = Color(0xFF313E55),
-                        disabledContainerColor = Color(0xFF313E55),
-                        errorContainerColor = Color(0xFF313E55),
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                        errorIndicatorColor = Color.Transparent,
-                        cursorColor = Color.White,
-                        errorCursorColor = Color.Red,
-                        focusedLabelColor = Color.Transparent,
-                        unfocusedLabelColor = Color.Transparent,
-                        errorLabelColor = Color.Transparent
-                    ),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Password
-                    ),
-                    supportingText = {
-                        if (isTouched && isPasswordInvalid) {
-                            Text(
-                                text = "Password must be at least 6 characters",
-                                color = Color.White
-                            )
-                        }
-                    },
-                    textStyle = TextStyle(
-                        color = Color.White,
-                        fontFamily = firasans,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp
-                    ),
-                )
-
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
                     onClick = {
-                        if (isEmailValid && password.length >= 6) {
-                            viewModel.login(email, password)
+                        if (isEmailValid && email.isNotBlank()) {
+                            viewModel.sendPasswordResetEmail(email)
                         } else {
                             isTouched = true
                         }
                     },
                     modifier = Modifier
-                        .fillMaxWidth(0.8f)
+                        .fillMaxWidth()
                         .height(50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -286,57 +201,45 @@ fun SignIn(navController: NavController) {
                     )
                 ) {
                     Text(
-                        text = "Log In",
-                        fontFamily = firasans, color = Color.White,
+                        text = "Send Reset Link",
+                        fontFamily = firasans,
+                        color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .padding(top = 16.dp),
+                        .fillMaxWidth(0.8f),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 30.dp)) {
                         Text(
-                            text = "New to Eventers?",
+                            text = "Remember your password?",
                             fontFamily = firasans,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Medium
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
                         TextButton(
-                            onClick = { navController.navigate(Routes.third) },
-                            contentPadding = PaddingValues(0.dp)
+                            onClick = { navController.popBackStack() },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent
+                            )
                         ) {
                             Text(
-                                text = "Sign Up",
+                                text = "Back to Sign In",
                                 fontFamily = firasans,
-                                fontSize = 16.sp,
+                                color = Color(0xFFAB90FA),
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFAB90FA)
+                                fontSize = 18.sp,
                             )
                         }
-                    }
-                    TextButton(
-                        onClick = { navController.navigate(Routes.eleventh) },
-                        contentPadding = PaddingValues(0.dp)
-                    ) {
-                        Text(
-                            text = "Forgot Password",
-                            fontFamily = firasans,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFFAB90FA)
-                        )
                     }
                 }
             }
