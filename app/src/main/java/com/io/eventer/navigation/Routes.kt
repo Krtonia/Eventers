@@ -13,4 +13,6 @@ object Routes
     val nineth = "User"
     val tenth = "EventDetail"
     val eleventh = "PasswordReset"
+    val twelveth = "reset_password_confirm/{email}/{token}"
+    val resetPasswordWithToken = "reset_password_confirm"
 }

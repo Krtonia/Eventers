@@ -5,6 +5,7 @@ sealed class AuthState {
     object Loading : AuthState()
     object Success : AuthState()
     object PasswordResetEmailSent : AuthState()
+    object PasswordResetSuccess : AuthState()
     object EmailUpdateSent : AuthState()
     data class Error(val message: String) : AuthState()
 }

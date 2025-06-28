@@ -69,6 +69,32 @@ class AuthRepository @Inject constructor(private val supabase: SupabaseClient) {
         }
     }
 
+    fun resetPassword(accessToken: String, newPassword: String): Flow<AuthState> = flow {
+        emit(AuthState.Loading)
+        try {
+            supabase.auth.updateUser {
+                password = newPassword
+            }
+            emit(AuthState.PasswordResetSuccess)
+        } catch (e: Exception) {
+            emit(AuthState.Error(e.localizedMessage ?: "Failed to reset password"))
+        }
+    }
+
+    fun verifyOtp(email: String, token: String, type: String = "recovery"): Flow<AuthState> = flow {
+        emit(AuthState.Loading)
+        try {
+            supabase.auth.verifyEmailOtp(
+                type = io.github.jan.supabase.auth.OtpType.Email.RECOVERY,
+                email = email,
+                token = token
+            )
+            emit(AuthState.Success)
+        } catch (e: Exception) {
+            emit(AuthState.Error(e.localizedMessage ?: "Invalid or expired token"))
+        }
+    }
+
     fun sendPasswordResetEmail(emailValue: String): Flow<AuthState> = flow {
         emit(AuthState.Loading)
         try {

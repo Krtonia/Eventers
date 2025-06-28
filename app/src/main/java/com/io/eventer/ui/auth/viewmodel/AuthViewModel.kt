@@ -91,6 +91,32 @@ class AuthViewModel @Inject constructor(
         authState = AuthState.Idle
     }
 
+    fun resetPassword(accessToken: String, newPassword: String) {
+        authState = AuthState.Loading
+
+        authRepository.resetPassword(accessToken, newPassword)
+            .onEach { state ->
+                authState = state
+                if (state is AuthState.PasswordResetSuccess) {
+                    loginMessage = "Password reset successful! Please log in with your new password."
+                } else if (state is AuthState.Error) {
+                    loginMessage = state.message
+                }
+            }.launchIn(viewModelScope)
+    }
+
+    fun verifyResetToken(email: String, token: String) {
+        authState = AuthState.Loading
+
+        authRepository.verifyOtp(email, token)
+            .onEach { state ->
+                authState = state
+                if (state is AuthState.Error) {
+                    loginMessage = state.message
+                }
+            }.launchIn(viewModelScope)
+    }
+
     fun isUserLoggedIn(): Boolean {
         try {
             val user = client.auth.currentUserOrNull()

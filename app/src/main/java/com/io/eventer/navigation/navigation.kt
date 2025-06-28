@@ -1,6 +1,10 @@
 package com.io.eventer.navigation
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,13 +19,59 @@ import com.io.eventer.ui.home.profile.Profile
 import com.io.eventer.ui.home.user.User
 import com.io.eventer.ui.Welcome
 import com.io.eventer.ui.auth.PasswordReset
+import com.io.eventer.ui.auth.ResetPassword
 import com.io.eventer.ui.auth.SignUp
 import com.io.eventer.ui.home.event.EventDetail
-import io.github.jan.supabase.SupabaseClient
+
 
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        val sharedPref = context.getSharedPreferences("deep_link_params", Context.MODE_PRIVATE)
+        val shouldShowError = sharedPref.getBoolean("should_show_error", false)
+        if (shouldShowError) {
+            val errorMessage = sharedPref.getString("reset_error", "Link has expired")
+            with(sharedPref.edit()) {
+                remove("reset_error")
+                remove("should_show_error")
+                apply()
+            }
+            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+            navController.navigate(Routes.eleventh) {
+                popUpTo(Routes.first) { inclusive = false }
+            }
+            return@LaunchedEffect
+        }
+        val shouldNavigate = sharedPref.getBoolean("should_navigate_to_reset", false)
+        if (shouldNavigate) {
+            val token = sharedPref.getString("reset_token", "")
+            val email = sharedPref.getString("reset_email", "") ?: ""
+
+            if (!token.isNullOrEmpty()) {
+                with(sharedPref.edit()) {
+                    remove("reset_token")
+                    remove("reset_email")
+                    remove("should_navigate_to_reset")
+                    apply()
+                }
+
+                val encodedEmail = if (email.isNotEmpty()) {
+                    java.net.URLEncoder.encode(email, "UTF-8")
+                } else {
+                    "unknown" // Default value when email is not available
+                }
+                val encodedToken = java.net.URLEncoder.encode(token, "UTF-8")
+
+                navController.navigate("reset_password_confirm/$encodedEmail/$encodedToken") {
+                    popUpTo(Routes.first) { inclusive = false }
+                }
+            }
+        }
+    }
+
     NavHost(navController = navController, startDestination = Routes.first) {
         composable(Routes.first) { Welcome(navController) }
         composable(Routes.second) { SignIn(navController) }
@@ -32,10 +82,29 @@ fun Navigation() {
         composable(Routes.seventh) { Info(navController) }
         composable(Routes.eigth) { Help(navController) }
         composable(Routes.nineth) { User(navController) }
-        composable(route = "${Routes.tenth}/{eventId}", arguments = listOf(navArgument("eventId") { type = NavType.StringType })) { backStackEntry ->
+        composable(
+            route = "${Routes.tenth}/{eventId}",
+            arguments = listOf(navArgument("eventId") { type = NavType.StringType })
+        ) { backStackEntry ->
             val eventId = backStackEntry.arguments?.getString("eventId")
             EventDetail(navController, eventId)
         }
-        composable(Routes.eleventh){ PasswordReset(navController) }
+        composable(Routes.eleventh) { PasswordReset(navController) }
+        composable(
+            route = Routes.twelveth,
+            arguments = listOf(
+                navArgument("email") {
+                    type = NavType.StringType
+                    defaultValue = "unknown" // Add default value
+                },
+                navArgument("token") {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val email = backStackEntry.arguments?.getString("email") ?: "unknown"
+            val token = backStackEntry.arguments?.getString("token") ?: ""
+            ResetPassword(navController, email, token)
+        }
     }
 }
