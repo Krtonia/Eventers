@@ -2,7 +2,7 @@ package com.io.eventer.ui.auth
 
 import android.util.Patterns
 import android.widget.Toast
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -33,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -44,6 +43,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.io.eventer.R
 import com.io.eventer.ui.auth.viewmodel.AuthViewModel
 import com.io.eventer.ui.auth.components.AuthState
@@ -55,6 +59,12 @@ fun PasswordReset(navController: NavController) {
     val state = viewModel.authState
     val context = LocalContext.current
     val passwordResetMessage = viewModel.passwordResetMessage
+
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.question))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever
+    )
 
     LaunchedEffect(passwordResetMessage) {
         passwordResetMessage?.let {
@@ -70,13 +80,8 @@ fun PasswordReset(navController: NavController) {
         }
     }
 
+
     Box(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(R.drawable.background),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
 
         if (state is AuthState.Loading) {
             Box(
@@ -96,13 +101,22 @@ fun PasswordReset(navController: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Spacer(modifier = Modifier.height(32.dp))
+
+                LottieAnimation(
+                    composition = composition,
+                    progress = { progress },
+                    modifier = Modifier
+                        .size(350.dp)
+                        .padding(top = 0.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
                     text = "Reset Password",
                     fontFamily = firasans,
-                    color = Color.White,
-                    fontSize = 45.sp,
+                    color = if (!isSystemInDarkTheme()) Color.Black else Color.White,
+                    style = MaterialTheme.typography.displayLarge,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center
                 )
@@ -112,14 +126,14 @@ fun PasswordReset(navController: NavController) {
                 Text(
                     text = "Enter your email address and we'll send you a link to reset your password",
                     fontFamily = firasans,
-                    color = Color.White,
-                    fontSize = 16.sp,
+                    color = if (!isSystemInDarkTheme()) Color.Black else Color.White,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
 
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(30.dp))
 
                 var email by remember { mutableStateOf("") }
                 var isTouched by remember { mutableStateOf(false) }
@@ -182,7 +196,7 @@ fun PasswordReset(navController: NavController) {
                     ),
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Button(
                     onClick = {
@@ -213,7 +227,7 @@ fun PasswordReset(navController: NavController) {
 
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth(0.8f),
+                        .fillMaxWidth(0.76f),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -222,7 +236,7 @@ fun PasswordReset(navController: NavController) {
                             text = "Remember your password?",
                             fontFamily = firasans,
                             color = Color.White,
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium
                         )
                         TextButton(
@@ -235,9 +249,9 @@ fun PasswordReset(navController: NavController) {
                             Text(
                                 text = "Back to Sign In",
                                 fontFamily = firasans,
+                                style = MaterialTheme.typography.bodyLarge,
                                 color = Color(0xFFAB90FA),
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
                             )
                         }
                     }

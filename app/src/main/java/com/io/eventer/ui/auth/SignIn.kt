@@ -22,6 +22,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -119,7 +120,7 @@ fun SignIn(navController: NavController) {
                     text = "Hello !",
                     fontFamily = firasans,
                     color = Color.White,
-                    fontSize = 34.sp,
+                    style = MaterialTheme.typography.displayLarge,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Right
                 )
@@ -129,12 +130,12 @@ fun SignIn(navController: NavController) {
                     text = "Welcome back to Eventers",
                     fontFamily = firasans,
                     color = Color.White,
-                    fontSize = 32.sp,
+                    style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Right
                 )
 
-                Spacer(modifier = Modifier.height(60.dp))
+                Spacer(modifier = Modifier.height(40.dp))
 
                 var email by remember { mutableStateOf("") }
                 var isTouched by remember { mutableStateOf(false) }
@@ -308,7 +309,7 @@ fun SignIn(navController: NavController) {
                         Text(
                             text = "New to Eventers?",
                             fontFamily = firasans,
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.White
                         )
@@ -320,7 +321,7 @@ fun SignIn(navController: NavController) {
                             Text(
                                 text = "Sign Up",
                                 fontFamily = firasans,
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFFAB90FA)
                             )
@@ -333,7 +334,7 @@ fun SignIn(navController: NavController) {
                         Text(
                             text = "Forgot Password",
                             fontFamily = firasans,
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFFAB90FA)
                         )

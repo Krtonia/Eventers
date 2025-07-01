@@ -45,27 +45,32 @@ fun Navigation() {
             }
             return@LaunchedEffect
         }
+
         val shouldNavigate = sharedPref.getBoolean("should_navigate_to_reset", false)
         if (shouldNavigate) {
-            val token = sharedPref.getString("reset_token", "")
-            val email = sharedPref.getString("reset_email", "") ?: ""
+            val accessToken = sharedPref.getString("access_token", "")
+            val refreshToken = sharedPref.getString("refresh_token", "")
+            val email = sharedPref.getString("reset_email", "")
 
-            if (!token.isNullOrEmpty()) {
+            if (!accessToken.isNullOrEmpty()) {
                 with(sharedPref.edit()) {
-                    remove("reset_token")
+                    remove("access_token")
+                    remove("refresh_token")
                     remove("reset_email")
                     remove("should_navigate_to_reset")
                     apply()
                 }
 
-                val encodedEmail = if (email.isNotEmpty()) {
+                // Navigate with encoded parameters
+                val encodedEmail = if (!email.isNullOrEmpty()) {
                     java.net.URLEncoder.encode(email, "UTF-8")
                 } else {
-                    "unknown" // Default value when email is not available
+                    "unknown"
                 }
-                val encodedToken = java.net.URLEncoder.encode(token, "UTF-8")
+                val encodedAccessToken = java.net.URLEncoder.encode(accessToken, "UTF-8")
+                val encodedRefreshToken = java.net.URLEncoder.encode(refreshToken ?: "", "UTF-8")
 
-                navController.navigate("reset_password_confirm/$encodedEmail/$encodedToken") {
+                navController.navigate("reset_password_confirm/$encodedEmail/$encodedAccessToken/$encodedRefreshToken") {
                     popUpTo(Routes.first) { inclusive = false }
                 }
             }
@@ -95,16 +100,21 @@ fun Navigation() {
             arguments = listOf(
                 navArgument("email") {
                     type = NavType.StringType
-                    defaultValue = "unknown" // Add default value
+                    defaultValue = "unknown"
                 },
-                navArgument("token") {
+                navArgument("accessToken") {
                     type = NavType.StringType
+                },
+                navArgument("refreshToken") {
+                    type = NavType.StringType
+                    defaultValue = ""
                 }
             )
         ) { backStackEntry ->
             val email = backStackEntry.arguments?.getString("email") ?: "unknown"
-            val token = backStackEntry.arguments?.getString("token") ?: ""
-            ResetPassword(navController, email, token)
+            val accessToken = backStackEntry.arguments?.getString("accessToken") ?: ""
+            val refreshToken = backStackEntry.arguments?.getString("refreshToken") ?: ""
+            ResetPassword(navController, email, accessToken, refreshToken)
         }
     }
 }

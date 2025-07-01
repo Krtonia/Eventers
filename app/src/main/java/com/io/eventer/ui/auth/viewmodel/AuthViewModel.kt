@@ -12,6 +12,7 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -91,10 +92,10 @@ class AuthViewModel @Inject constructor(
         authState = AuthState.Idle
     }
 
-    fun resetPassword(accessToken: String, newPassword: String) {
+    fun resetPassword(newPassword: String) {
         authState = AuthState.Loading
 
-        authRepository.resetPassword(accessToken, newPassword)
+        authRepository.resetPassword(newPassword)
             .onEach { state ->
                 authState = state
                 if (state is AuthState.PasswordResetSuccess) {
@@ -105,16 +106,18 @@ class AuthViewModel @Inject constructor(
             }.launchIn(viewModelScope)
     }
 
-    fun verifyResetToken(email: String, token: String) {
+    fun setSessionFromTokens(accessToken: String, refreshToken: String) {
         authState = AuthState.Loading
 
-        authRepository.verifyOtp(email, token)
-            .onEach { state ->
-                authState = state
-                if (state is AuthState.Error) {
-                    loginMessage = state.message
-                }
-            }.launchIn(viewModelScope)
+        viewModelScope.launch {
+            authRepository.setSessionFromTokens(accessToken, refreshToken)
+                .onEach { state ->
+                    authState = state
+                    if (state is AuthState.Error) {
+                        loginMessage = state.message
+                    }
+                }.launchIn(this)
+        }
     }
 
     fun isUserLoggedIn(): Boolean {

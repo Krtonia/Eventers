@@ -1,7 +1,8 @@
 package com.io.eventer.ui.auth
 
+import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -39,21 +41,30 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.io.eventer.R
 import com.io.eventer.navigation.Routes
 import com.io.eventer.ui.auth.viewmodel.AuthViewModel
 import com.io.eventer.ui.auth.components.AuthState
 import com.io.eventer.ui.theme.firasans
+import io.github.jan.supabase.auth.admin.AdminUserBuilder
 
 @Composable
 fun ResetPassword(
     navController: NavController,
     email: String,
-    token: String
+    accessToken: String,
+    refreshToken: String
 ) {
     val viewModel: AuthViewModel = hiltViewModel()
     val state = viewModel.authState
@@ -63,7 +74,12 @@ fun ResetPassword(
     var isTokenVerified by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.verifyResetToken(email, token)
+        Log.d("ResetPassword", "Email: $email")
+        Log.d("ResetPassword", "Access Token: ${accessToken.take(20)}...")
+        Log.d("ResetPassword", "Refresh Token: ${refreshToken.take(20)}...")
+
+        // Set session using the tokens from deep link(Email session doesn't work mpw in supabase auth)
+        viewModel.setSessionFromTokens(accessToken, refreshToken)
     }
 
     LaunchedEffect(state) {
@@ -89,13 +105,17 @@ fun ResetPassword(
         }
     }
 
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.lock))
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+        speed = 1f,
+        
+    )
+
+
     Box(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(R.drawable.background),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
+
 
         if (state is AuthState.Loading) {
             Box(
@@ -118,9 +138,9 @@ fun ResetPassword(
                 Text(
                     text = "Invalid or Expired Link",
                     fontFamily = firasans,
-                    color = Color.White,
+                    color = if (!isSystemInDarkTheme()) Color.Black else Color.White,
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center
                 )
 
@@ -129,8 +149,9 @@ fun ResetPassword(
                 Text(
                     text = "The password reset link is invalid or has expired. Please request a new one.",
                     fontFamily = firasans,
-                    color = Color.White,
+                    color = if (!isSystemInDarkTheme()) Color.Black else Color.White,
                     fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center
                 )
 
@@ -146,7 +167,7 @@ fun ResetPassword(
                     Text(
                         text = "Request New Link",
                         fontFamily = firasans,
-                        color = Color.White,
+                        color = if (!isSystemInDarkTheme()) Color.Black else Color.White,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -159,24 +180,34 @@ fun ResetPassword(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+
+                LottieAnimation(
+                    composition = composition,
+                    progress = { progress },
+                    modifier = Modifier
+                        .size(350.dp)
+                        .padding(top = 0.dp)
+                )
+
                 Text(
                     text = "Reset Password",
                     fontFamily = firasans,
-                    color = Color.White,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold,
+                    color = if (!isSystemInDarkTheme()) Color.Black else Color.White,
+                    style = MaterialTheme.typography.displayMedium,
+                    fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = "Enter your new password",
                     fontFamily = firasans,
-                    color = Color.White,
-                    fontSize = 16.sp,
+                    color = if (!isSystemInDarkTheme()) Color.Black else Color.White,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(28.dp))
 
                 var newPassword by remember { mutableStateOf("") }
                 var confirmPassword by remember { mutableStateOf("") }
@@ -228,7 +259,7 @@ fun ResetPassword(
                         if (newPassword.isNotBlank() && newPassword.length < 6) {
                             Text(
                                 text = "Password must be at least 6 characters",
-                                color = Color.White
+                                color = if (!isSystemInDarkTheme()) Color.Black else Color.White
                             )
                         }
                     },
@@ -294,12 +325,9 @@ fun ResetPassword(
                 Button(
                     onClick = {
                         if (newPassword.length >= 6 && newPassword == confirmPassword) {
-                            viewModel.resetPassword(token, newPassword)
+                            viewModel.resetPassword(newPassword)
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF5F19F2)
@@ -311,7 +339,7 @@ fun ResetPassword(
                         fontFamily = firasans,
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+                        style = MaterialTheme.typography.bodyLarge
                     )
                 }
             }

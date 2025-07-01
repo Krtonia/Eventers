@@ -19,6 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        handleDeepLink(intent)
         enableEdgeToEdge()
         setContent {
             EventerTheme(dynamicColor = true) {
@@ -26,7 +27,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    handleDeepLink(intent)
                     Navigation()
                 }
             }
@@ -63,16 +63,30 @@ class MainActivity : ComponentActivity() {
 
                     val accessToken = params["access_token"]
                     val refreshToken = params["refresh_token"]
+                    val tokenType = params["token_type"]
+                    val type = params["type"]
 
-                    if (accessToken != null) {
+                    Log.d("DeepLink", "Access Token: $accessToken")
+                    Log.d("DeepLink", "Type: $type")
+
+                    if (accessToken != null && type == "recovery") {
                         val email = extractEmailFromJWT(accessToken)
+                        Log.d("DeepLink", "Extracted Email: $email")
 
                         val sharedPref = getSharedPreferences("deep_link_params", Context.MODE_PRIVATE)
                         with(sharedPref.edit()) {
-                            putString("reset_token", accessToken)
-                            putString("reset_email", email)
+                            // Store tokens for session-based authentication
+                            putString("access_token", accessToken)
                             putString("refresh_token", refreshToken ?: "")
+                            putString("reset_email", email)
                             putBoolean("should_navigate_to_reset", true)
+                            apply()
+                        }
+                    } else {
+                        val sharedPref = getSharedPreferences("deep_link_params", Context.MODE_PRIVATE)
+                        with(sharedPref.edit()) {
+                            putString("reset_error", "Invalid reset link")
+                            putBoolean("should_show_error", true)
                             apply()
                         }
                     }

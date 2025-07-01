@@ -36,7 +36,7 @@ fun Welcome(navController: NavController) {
 
     LaunchedEffect(key1 = Unit) {
         coroutineScope.launch {
-            delay(1000)
+            delay(500)
             try {
                 val isLoggedIn = viewModel.isUserLoggedIn()
                 android.util.Log.d("Welcome", "User logged in: $isLoggedIn")

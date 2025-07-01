@@ -81,39 +81,39 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    //Kotlin
+    // Kotlin
     implementation(libs.kotlin.stdlib)
 
-    //Hilt
+    // Hilt
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    //Security
+    // Security
     implementation(libs.androidx.security.crypto)
     implementation(libs.accompanist.permissions)
 
-    //lifecycle compose
+    // lifecycle compose
     implementation(libs.androidx.lifecycle.runtime.ktx.v262)
     implementation(libs.androidx.lifecycle.viewmodel.compose.v262)
     implementation(libs.androidx.lifecycle.compose)
 
-    //Retrofit && Gson
+    // Retrofit && Gson
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
 
-    //OkHttp
+    // OkHttp
     implementation(libs.okhttp)
 
-    //Kapt
+    // Kapt
     kapt(libs.androidx.lifecycle.compiler)
 
-    //Supabase
+    // Supabase
     implementation(platform(libs.bom))
     implementation(libs.supabase.postgrest.kt)
     implementation(libs.auth.kt)
 
-    //Swipe To Refresh
+    // Swipe To Refresh
     implementation (libs.accompanist.swiperefresh)
 
     // Ktor
@@ -124,10 +124,13 @@ dependencies {
     implementation(libs.ktor.client.logging)
     implementation(libs.ktor.client.auth)
 
-    //Glide
+    // Glide
     implementation(libs.glide)
     annotationProcessor(libs.compiler)
     implementation(libs.compose)
+
+    // Lottie
+    implementation(libs.lottie.compose)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)

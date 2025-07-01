@@ -1,7 +1,6 @@
 package com.io.eventer.navigation
 
-object Routes
-{
+object Routes {
     val first = "Welcome"
     val second = "SignIn"
     val third = "SignUp"
@@ -13,6 +12,6 @@ object Routes
     val nineth = "User"
     val tenth = "EventDetail"
     val eleventh = "PasswordReset"
-    val twelveth = "reset_password_confirm/{email}/{token}"
+    val twelveth = "reset_password_confirm/{email}/{accessToken}/{refreshToken}"
     val resetPasswordWithToken = "reset_password_confirm"
 }

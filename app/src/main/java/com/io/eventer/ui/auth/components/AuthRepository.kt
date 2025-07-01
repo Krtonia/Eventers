@@ -18,7 +18,7 @@ class AuthRepository @Inject constructor(private val supabase: SupabaseClient) {
 
             val userData = JsonObject(mapOf("name" to JsonPrimitive(name)))
 
-            val response = supabase.auth.signUpWith(Email) {
+            supabase.auth.signUpWith(Email) {
                 email = emailValue
                 password = passwordValue
                 data = userData
@@ -69,7 +69,7 @@ class AuthRepository @Inject constructor(private val supabase: SupabaseClient) {
         }
     }
 
-    fun resetPassword(accessToken: String, newPassword: String): Flow<AuthState> = flow {
+    fun resetPassword(newPassword: String): Flow<AuthState> = flow {
         emit(AuthState.Loading)
         try {
             supabase.auth.updateUser {
@@ -81,14 +81,11 @@ class AuthRepository @Inject constructor(private val supabase: SupabaseClient) {
         }
     }
 
-    fun verifyOtp(email: String, token: String, type: String = "recovery"): Flow<AuthState> = flow {
+    fun setSessionFromTokens(accessToken: String, refreshToken: String): Flow<AuthState> = flow {
         emit(AuthState.Loading)
         try {
-            supabase.auth.verifyEmailOtp(
-                type = io.github.jan.supabase.auth.OtpType.Email.RECOVERY,
-                email = email,
-                token = token
-            )
+            // Set the session using the tokens from the deep link
+            supabase.auth.importAuthToken(accessToken, refreshToken)
             emit(AuthState.Success)
         } catch (e: Exception) {
             emit(AuthState.Error(e.localizedMessage ?: "Invalid or expired token"))
