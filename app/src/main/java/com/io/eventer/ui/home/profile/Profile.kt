@@ -147,7 +147,7 @@ fun ProfileHeader(onImageSelected: (Uri) -> Unit) {
         }
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
+    rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {

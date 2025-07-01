@@ -1,7 +1,7 @@
 package com.io.eventer
 
-import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -22,7 +22,9 @@ class MainActivity : ComponentActivity() {
         handleDeepLink(intent)
         enableEdgeToEdge()
         setContent {
-            EventerTheme(dynamicColor = true) {
+            val supportsDynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                    Build.MANUFACTURER.lowercase() !in listOf("samsung", "xiaomi", "oppo", "vivo", "realme", "iqoo")
+            EventerTheme(dynamicColor = supportsDynamicColor) {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -52,7 +54,7 @@ class MainActivity : ComponentActivity() {
 
                     if (error != null) {
                         val errorDescription = params["error_description"]
-                        val sharedPref = getSharedPreferences("deep_link_params", Context.MODE_PRIVATE)
+                        val sharedPref = getSharedPreferences("deep_link_params", MODE_PRIVATE)
                         with(sharedPref.edit()) {
                             putString("reset_error", errorDescription ?: "Link has expired")
                             putBoolean("should_show_error", true)
@@ -63,7 +65,6 @@ class MainActivity : ComponentActivity() {
 
                     val accessToken = params["access_token"]
                     val refreshToken = params["refresh_token"]
-                    val tokenType = params["token_type"]
                     val type = params["type"]
 
                     Log.d("DeepLink", "Access Token: $accessToken")
@@ -73,7 +74,7 @@ class MainActivity : ComponentActivity() {
                         val email = extractEmailFromJWT(accessToken)
                         Log.d("DeepLink", "Extracted Email: $email")
 
-                        val sharedPref = getSharedPreferences("deep_link_params", Context.MODE_PRIVATE)
+                        val sharedPref = getSharedPreferences("deep_link_params", MODE_PRIVATE)
                         with(sharedPref.edit()) {
                             // Store tokens for session-based authentication
                             putString("access_token", accessToken)
@@ -83,7 +84,7 @@ class MainActivity : ComponentActivity() {
                             apply()
                         }
                     } else {
-                        val sharedPref = getSharedPreferences("deep_link_params", Context.MODE_PRIVATE)
+                        val sharedPref = getSharedPreferences("deep_link_params", MODE_PRIVATE)
                         with(sharedPref.edit()) {
                             putString("reset_error", "Invalid reset link")
                             putBoolean("should_show_error", true)

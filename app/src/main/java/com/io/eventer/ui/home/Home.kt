@@ -150,9 +150,9 @@ fun TopAppBarContent() {
     TopAppBar(
         title = {
             Text(
-                modifier = Modifier.padding(horizontal = 5.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = 5.dp, vertical = 0.dp),
                 text = "Welcome",
-                fontSize = 42.sp,
+                style = MaterialTheme.typography.headlineLarge,
                 fontFamily = firasans,
                 fontWeight = FontWeight.SemiBold
             )
@@ -261,7 +261,7 @@ fun EventCards(
                             ) {
                                 Text(
                                     text = date,
-                                    fontSize = 18.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier
@@ -346,17 +346,16 @@ fun EventCards(
                                     ) {
                                         Text(
                                             text = event.title,
-                                            fontSize = 22.sp,
+                                            style = MaterialTheme.typography.titleLarge,
                                             fontWeight = FontWeight.SemiBold
                                         )
                                         if (event.description.isNotEmpty()) {
                                             Text(
                                                 text = event.description,
-                                                fontSize = 14.sp,
+                                                style = MaterialTheme.typography.bodySmall,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis,
                                                 color = Color.Gray,
-                                                modifier = Modifier.padding(top = 4.dp)
                                             )
                                         }
                                         Box(
@@ -365,8 +364,8 @@ fun EventCards(
                                         ) {
                                             Text(
                                                 text = "Tap to view details",
-                                                fontSize = 12.sp,
-                                                color = MaterialTheme.colorScheme.primary
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer
                                             )
                                         }
                                     }

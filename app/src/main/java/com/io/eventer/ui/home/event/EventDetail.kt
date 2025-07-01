@@ -60,7 +60,7 @@ fun EventDetail(
             TopAppBar(
                 title = { Text(
                     text = "Event Details",
-                    fontSize = 24.sp,
+                    style = MaterialTheme.typography.headlineLarge,
                     fontFamily = firasans,
                     fontWeight = FontWeight.SemiBold
                 ) },
@@ -191,23 +191,19 @@ fun EventDetail(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(16.dp),
                     ) {
                         Text(
                             text = event.title,
-                            fontSize = 28.sp,
+                            style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
 
                         if (event.code.isNotEmpty()) {
                             Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                                ),
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.Gray.copy(alpha = 0.15f)),
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Column(
@@ -216,13 +212,13 @@ fun EventDetail(
                                 ) {
                                     Text(
                                         text = "Event Code",
-                                        fontSize = 16.sp,
+                                        style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Medium
                                     )
 
                                     Text(
                                         text = event.code,
-                                        fontSize = 24.sp,
+                                        style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold,
                                         letterSpacing = 2.sp,
                                         modifier = Modifier.padding(top = 4.dp)
@@ -230,7 +226,7 @@ fun EventDetail(
 
                                     Text(
                                         text = "Share this code with your guests",
-                                        fontSize = 12.sp,
+                                        style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.padding(top = 4.dp)
                                     )
@@ -270,12 +266,6 @@ fun EventDetail(
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
-
-                        Text(
-                            text = "Created: ",
-                            fontSize = 14.sp,
-                            color = Color.Gray
-                        )
 
                         Text(
                             text = "Event ID: ${event.id}",

@@ -58,16 +58,6 @@ fun Welcome(navController: NavController) {
         }
     }
 
-    // LaunchedEffect to automatically navigate after 1 second
-//    LaunchedEffect(key1 = true) {
-//        delay(300)
-//        navController.navigate(Routes.second) {
-//            popUpTo(navController.graph.startDestinationId) {
-//                inclusive = true
-//            }
-//        }
-//    }
-
     Column(
         modifier = Modifier
             .fillMaxSize(1f)

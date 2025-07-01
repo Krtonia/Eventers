@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.io.eventer.model.Event
 import com.io.eventer.model.EventDetailState
+import com.io.eventer.ui.auth.components.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -19,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EventDetailViewModel @Inject constructor(
-    private val supabaseClient: SupabaseClient
+    private val supabaseClient: SupabaseClient,
 ) : ViewModel() {
 
     private val _eventState = MutableStateFlow(EventDetailState())
