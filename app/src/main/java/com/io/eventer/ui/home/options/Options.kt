@@ -141,6 +141,14 @@ fun Sed(navController: NavController) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
+        Image(
+            modifier = Modifier
+                .padding(16.dp).size(150.dp),
+            painter = painterResource(id = R.drawable.options),
+            contentDescription = "options"
+        )
+
         // Google Calendar Launch
         OptionCard(
             imageRes = R.drawable.calender,

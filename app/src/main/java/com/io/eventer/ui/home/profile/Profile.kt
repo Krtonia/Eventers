@@ -29,14 +29,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import com.io.eventer.navigation.Routes
 import com.io.eventer.ui.theme.firasans
@@ -44,7 +42,6 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import com.io.eventer.R
-import com.io.eventer.ui.theme.EventerTheme
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 
@@ -179,7 +176,7 @@ fun ProfileHeader(onImageSelected: (Uri) -> Unit) {
                 painter = if (imageUri != null) {
                     rememberAsyncImagePainter(imageUri)
                 } else {
-                    painterResource(id = R.drawable.test)
+                    painterResource(id = R.drawable.profile_photo)
                 },
                 contentDescription = "Profile Image",
                 contentScale = ContentScale.Crop,
