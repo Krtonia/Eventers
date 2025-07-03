@@ -3,6 +3,7 @@ package com.io.eventer.ui.home.profile
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -46,8 +47,6 @@ import com.io.eventer.R
 import com.io.eventer.ui.theme.EventerTheme
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.postgrest.from
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -91,6 +90,13 @@ fun Profile(navController: NavController) {
         },
     ) { innerPadding ->
         ProfileContent(navController, Modifier.padding(innerPadding),viewModel = hiltViewModel())
+    }
+    BackHandler {
+        navController.navigate(Routes.fourth) {
+            popUpTo(0) {
+                inclusive = true
+            }
+        }
     }
 }
 
@@ -206,7 +212,7 @@ fun WelcomeText(viewModel: ProfileViewModel) {
     ) {
         Text(
             text = "Hello $username! What Brings You here?",
-            fontSize = 26.sp,
+            style = MaterialTheme.typography.headlineLarge,
             fontFamily = firasans,
             fontWeight = FontWeight.Medium
         )
@@ -251,7 +257,6 @@ fun ProfileMenuItems(navController: NavController) {
                     val googleNotesPackage = "com.google.android.keep"
                     val intent =
                         context.packageManager.getLaunchIntentForPackage(googleNotesPackage)
-
                     if (intent != null) {
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         context.startActivity(intent)
@@ -273,7 +278,7 @@ fun ProfileMenuItems(navController: NavController) {
                 onClick = {
                     val shareIntent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, "Check out this awesome Event!")
+                        putExtra(Intent.EXTRA_TEXT, "Check out this awesome Event management app i found")
                     }
                     val chooserIntent = Intent.createChooser(
                         shareIntent,
@@ -320,13 +325,5 @@ fun ProfileMenuItem(
             contentDescription = "Navigate",
             modifier = Modifier.size(32.dp)
         )
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun ProfilePreview() {
-    EventerTheme(dynamicColor = true) {
-        Profile(navController = rememberNavController())
     }
 }

@@ -41,7 +41,7 @@ fun User(navController: NavController) {
                         Text(
                             modifier = Modifier.padding(horizontal = 5.dp, vertical = 8.dp),
                             text = "User Screen",
-                            fontSize = 42.sp,
+                            style = MaterialTheme.typography.headlineLarge,
                             fontFamily = firasans,
                             fontWeight = FontWeight.SemiBold,
                         )
@@ -223,18 +223,17 @@ fun UserContent(viewModel: ProfileViewModel) {
             ) {
                 Text(
                     text = "Current Credentials:",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
                     text = "Username: $initialUserName",
-                    color = Color.White.copy(alpha = 0.75f),
+                    fontWeight = FontWeight.Black,
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(
                     text = "Email: ${viewModel.getCurrentEmail()}",
-                    color = Color.White.copy(alpha = 0.75f),
+                    fontWeight = FontWeight.Black,
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -258,8 +257,8 @@ fun UserContent(viewModel: ProfileViewModel) {
                 )
                 Text(
                     text = "Changing email requires verification. You'll receive a confirmation email. Use your OLD email to login until you confirm the new one. Clicking the change email button in mail will change email ",
-                    color = Color.White.copy(alpha = 0.9f),
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -273,12 +272,11 @@ fun UserContent(viewModel: ProfileViewModel) {
             Icon(
                 imageVector = Icons.Default.Info,
                 contentDescription = "Info",
-                tint = Color.White,
                 modifier = Modifier.padding(end = 8.dp)
             )
             Text(
                 text = "Enter new information",
-                color = Color.White,
+                fontWeight = FontWeight.SemiBold,
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -348,7 +346,6 @@ fun UserContent(viewModel: ProfileViewModel) {
             Text(
                 text = "Update",
                 fontFamily = firasans,
-                color = Color.Black,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 18.sp
             )
@@ -385,15 +382,12 @@ fun UserInfoTextField(
             placeholder = {
                 Text(
                     text = label,
-                    color = Color.White,
                     style = MaterialTheme.typography.bodyMedium
                 )
             },
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = if (errorMessage != null) Color.Red else Color.White.copy(
-                    alpha = 0.5f
-                ),
-                focusedBorderColor = if (errorMessage != null) Color.Red else Color.White
+                unfocusedBorderColor = if (errorMessage != null) Color.Red else Color.Unspecified,
+                focusedBorderColor = if (errorMessage != null) Color.Red else Color.Unspecified
             ),
             isError = errorMessage != null
         )
@@ -426,14 +420,4 @@ fun validateEmail(email: String): String? {
         email.length > 100 -> "Email cannot exceed 100 characters"
         else -> null
     }
-}
-
-fun saveUserInformation(
-    userName: String,
-    email: String
-) {
-    // TODO: Implement your saving mechanism
-    println("Saving User Information:")
-    println("Username: $userName")
-    println("Email: $email")
 }

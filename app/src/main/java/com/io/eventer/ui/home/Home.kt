@@ -52,7 +52,7 @@ fun Home(navController: NavController, viewModel: EventViewModel = hiltViewModel
 
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) },
-        topBar = { Surface(shadowElevation = 50.dp) { TopAppBarContent() } },
+        topBar = { Surface(shadowElevation = 20.dp) { TopAppBarContent() } },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 elevation = FloatingActionButtonDefaults.elevation(12.dp),
@@ -115,7 +115,6 @@ fun Home(navController: NavController, viewModel: EventViewModel = hiltViewModel
     }
 }
 
-
 @Composable
 fun BottomNavigationBar(navController: NavController) {
     NavigationBar {
@@ -150,7 +149,7 @@ fun TopAppBarContent() {
     TopAppBar(
         title = {
             Text(
-                modifier = Modifier.padding(horizontal = 5.dp, vertical = 0.dp),
+                modifier = Modifier.padding(horizontal = 5.dp),
                 text = "Welcome",
                 style = MaterialTheme.typography.headlineLarge,
                 fontFamily = firasans,
@@ -214,7 +213,6 @@ fun EventCards(
     ) {
         Spacer(modifier = Modifier.height(9.dp))
         SwipeRefresh(
-            modifier = Modifier.fillMaxSize(1f),
             state = rememberSwipeRefreshState(isRefreshing),
             onRefresh = {
                 isRefreshing = true
@@ -249,12 +247,11 @@ fun EventCards(
                     }
                 }
             } else {
-                LazyColumn {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
                     for ((date, eventsInGroup) in groupedEvents) {
                         item {
                             Row(
                                 modifier = Modifier
-                                    .fillMaxSize()
                                     .fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center
@@ -279,8 +276,7 @@ fun EventCards(
                                     }
                                 },
                                 modifier = Modifier
-                                    .padding(horizontal = 20.dp)
-                                    .height(250.dp),
+                                    .padding(horizontal = 20.dp),
                                 elevation = CardDefaults.cardElevation(8.dp),
                                 shape = RoundedCornerShape(22.dp)
                             ) {
@@ -312,7 +308,7 @@ fun EventCards(
                                                 .align(Alignment.BottomEnd)
                                                 .padding(8.dp)
                                                 .background(
-                                                    color = Color.Black.copy(alpha = 0.6f),
+                                                    color = Color.Black.copy(alpha = 0.2f),
                                                     shape = RoundedCornerShape(4.dp)
                                                 )
                                         ) {

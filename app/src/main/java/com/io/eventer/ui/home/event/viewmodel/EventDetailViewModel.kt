@@ -81,7 +81,7 @@ class EventDetailViewModel @Inject constructor(
         }
     }
 
-    fun updateEvent(eventId: String, title: String, description: String, summary: String) {
+    fun updateEvent(eventId: String, title: String, description: String, summary: String, location: String) {
         viewModelScope.launch {
             _eventState.update { it.copy(isLoading = true) }
             try {
@@ -109,7 +109,8 @@ class EventDetailViewModel @Inject constructor(
                 val updatedData = mapOf(
                     "title" to title,
                     "description" to description,
-                    "summary" to summary
+                    "summary" to summary,
+                    "location" to location
                 )
                 supabaseClient.postgrest["events"]
                     .update(updatedData) {

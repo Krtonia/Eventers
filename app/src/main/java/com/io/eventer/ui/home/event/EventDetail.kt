@@ -3,6 +3,7 @@ package com.io.eventer.ui.home.event
 import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -28,6 +29,8 @@ import com.io.eventer.R
 import com.io.eventer.model.Event
 import com.io.eventer.ui.home.event.viewmodel.EventDetailViewModel
 import com.io.eventer.ui.theme.firasans
+import kotlinx.datetime.toLocalDate
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
 @Composable
@@ -58,12 +61,14 @@ fun EventDetail(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(
-                    text = "Event Details",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontFamily = firasans,
-                    fontWeight = FontWeight.SemiBold
-                ) },
+                title = {
+                    Text(
+                        text = "Event Details",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontFamily = firasans,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -90,18 +95,27 @@ fun EventDetail(
                                 val eventCode = it.code.ifEmpty { "No code available" }
                                 val shareIntent = Intent().apply {
                                     action = Intent.ACTION_SEND
-                                    putExtra(Intent.EXTRA_SUBJECT, "Join us for this event: ${it.title}")
-                                    putExtra(Intent.EXTRA_TEXT, """
+                                    putExtra(
+                                        Intent.EXTRA_SUBJECT,
+                                        "Join us for this event: ${it.title}"
+                                    )
+                                    putExtra(
+                                        Intent.EXTRA_TEXT, """
                                         Join us for: ${it.title}
                                         
-                                        ${if (it.description.isNotEmpty()) "Description: ${it.description}" else ""}
                                         ${if (it.summary.isNotEmpty()) "Summary: ${it.summary}" else ""}
                                         
                                         Use code: $eventCode to join!
-                                    """.trimIndent())
+                                    """.trimIndent()
+                                    )
                                     type = "text/plain"
                                 }
-                                context.startActivity(Intent.createChooser(shareIntent, "Share Event"))
+                                context.startActivity(
+                                    Intent.createChooser(
+                                        shareIntent,
+                                        "Share Event"
+                                    )
+                                )
                             }
                         }
                     ) {
@@ -155,9 +169,9 @@ fun EventDetail(
             if (isEditing.value) {
                 EventEditForm(
                     event = event,
-                    onSave = { title, description, summary ->
+                    onSave = { title, description, location, summary ->
                         eventId?.let {
-                            viewModel.updateEvent(it, title, description, summary)
+                            viewModel.updateEvent(it, title, description, location, summary)
                         }
                         isEditing.value = false
                     },
@@ -197,38 +211,40 @@ fun EventDetail(
                             text = event.title,
                             style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            modifier = Modifier
+                                .padding(bottom = 8.dp)
+                                .fillMaxWidth(),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         )
-
                         if (event.code.isNotEmpty()) {
                             Card(
-                                modifier = Modifier.padding(vertical = 8.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color.Gray.copy(alpha = 0.15f)),
+                                modifier = Modifier
+                                    .padding(vertical = 8.dp)
+                                    .align(Alignment.CenterHorizontally),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = Color.Gray.copy(
+                                        alpha = 0.15f
+                                    )
+                                ),
                                 shape = RoundedCornerShape(8.dp)
                             ) {
-                                Column(
-                                    modifier = Modifier.padding(16.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
+                                Row(
+                                    modifier = Modifier
+                                        .padding(16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        text = "Event Code",
+                                        text = "Event Code -:",
                                         style = MaterialTheme.typography.titleLarge,
-                                        fontWeight = FontWeight.Medium
+                                        fontWeight = FontWeight.SemiBold
                                     )
-
+                                    Spacer(modifier = Modifier.width(10.dp))
                                     Text(
                                         text = event.code,
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold,
-                                        letterSpacing = 2.sp,
-                                        modifier = Modifier.padding(top = 4.dp)
-                                    )
-
-                                    Text(
-                                        text = "Share this code with your guests",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(top = 4.dp)
+                                        modifier = Modifier.padding(top = 0.dp)
                                     )
                                 }
                             }
@@ -238,38 +254,63 @@ fun EventDetail(
 
                         Text(
                             text = "Description",
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
-
+                        Spacer(modifier= Modifier.height(6.dp))
                         Text(
                             text = if (event.description.isNotEmpty()) event.description else "No description provided",
-                            fontSize = 16.sp,
-                            modifier = Modifier.padding(bottom = 16.dp)
+                            style = MaterialTheme.typography.bodyLarge,
                         )
+
+                        Spacer(modifier = Modifier.height(10.dp))
 
                         if (event.summary.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
                                 text = "Summary",
-                                fontSize = 18.sp,
+                                style = MaterialTheme.typography.headlineLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier.padding(bottom = 4.dp)
                             )
 
                             Text(
                                 text = event.summary,
-                                fontSize = 16.sp
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        if (event.location.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = "Location",
+                                style = MaterialTheme.typography.headlineLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+
+                            Text(
+                                text = event.location,
+                                style = MaterialTheme.typography.bodyLarge
                             )
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
+                            text = "Created at: ${event.createdAt.substring(0,10)}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
+
+                        Text(
                             text = "Event ID: ${event.id}",
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray,
                             modifier = Modifier.padding(top = 4.dp)
                         )
@@ -292,13 +333,14 @@ fun EventDetail(
 @Composable
 fun EventEditForm(
     event: Event,
-    onSave: (String, String, String) -> Unit,
+    onSave: (String, String, String, String) -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var title by remember { mutableStateOf(event.title) }
     var description by remember { mutableStateOf(event.description) }
-    var summary by remember { mutableStateOf(event.summary ?: "") }
+    var location by remember { mutableStateOf(event.location) }
+    var summary by remember { mutableStateOf(event.summary) }
 
     Column(
         modifier = modifier
@@ -327,6 +369,17 @@ fun EventEditForm(
             value = description,
             onValueChange = { description = it },
             label = { Text("Description") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .padding(bottom = 16.dp),
+            shape = RoundedCornerShape(8.dp)
+        )
+
+        OutlinedTextField(
+            value = location,
+            onValueChange = { location = it },
+            label = { Text("Location") },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
@@ -387,7 +440,7 @@ fun EventEditForm(
             }
 
             Button(
-                onClick = { onSave(title, description, summary) }
+                onClick = { onSave(title, description, location,summary) }
             ) {
                 Text("Save Changes")
             }
