@@ -176,10 +176,10 @@ fun ProfileHeader(onImageSelected: (Uri) -> Unit) {
                 painter = if (imageUri != null) {
                     rememberAsyncImagePainter(imageUri)
                 } else {
-                    painterResource(id = R.drawable.profile_photo)
+                    painterResource(id = R.drawable.profile_pfp)
                 },
                 contentDescription = "Profile Image",
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .size(200.dp)
                     .clip(CircleShape)
@@ -205,11 +205,11 @@ fun WelcomeText(viewModel: ProfileViewModel) {
     Box(
         contentAlignment = Alignment.Center, modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp)
+            .padding(vertical = 16.dp)
     ) {
         Text(
             text = "Hello $username! What Brings You here?",
-            style = MaterialTheme.typography.headlineLarge,
+            style = MaterialTheme.typography.titleLarge,
             fontFamily = firasans,
             fontWeight = FontWeight.Medium
         )

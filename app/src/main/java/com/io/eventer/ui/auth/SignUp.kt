@@ -107,12 +107,11 @@ fun SignUp(navController: NavController) {
 
                 Text(
                     modifier = Modifier,
-                    text = "Welcome to Eventers",
+                    text = "Welcome back to Eventers",
                     fontFamily = firasans,
                     color = Color.White,
-                    style = MaterialTheme.typography.displayMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Right
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))

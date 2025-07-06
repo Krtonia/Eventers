@@ -102,9 +102,8 @@ fun EventDetail(
                                     putExtra(
                                         Intent.EXTRA_TEXT, """
                                         Join us for: ${it.title}
-                                        
-                                        ${if (it.summary.isNotEmpty()) "Summary: ${it.summary}" else ""}
-                                        
+                                        ${if (it.summary.isNotEmpty()) it.summary else ""}
+                                        ${if (it.location.isNotEmpty()) "At: ${it.location}" else ""}
                                         Use code: $eventCode to join!
                                     """.trimIndent()
                                     )
@@ -193,7 +192,7 @@ fun EventDetail(
                         GlideImage(
                             model = event.imageUrl,
                             contentDescription = "Event Image",
-                            contentScale = ContentScale.Crop,
+                            contentScale = ContentScale.Fit,
                             modifier = Modifier.fillMaxSize()
                         ) { requestBuilder ->
                             requestBuilder

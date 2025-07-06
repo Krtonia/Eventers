@@ -122,7 +122,6 @@ fun SignIn(navController: NavController) {
                     color = Color.White,
                     style = MaterialTheme.typography.displayLarge,
                     fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Right
                 )
 
                 Text(
@@ -130,9 +129,8 @@ fun SignIn(navController: NavController) {
                     text = "Welcome back to Eventers",
                     fontFamily = firasans,
                     color = Color.White,
-                    style = MaterialTheme.typography.displaySmall,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Right
                 )
 
                 Spacer(modifier = Modifier.height(40.dp))
@@ -309,7 +307,7 @@ fun SignIn(navController: NavController) {
                         Text(
                             text = "New to Eventers?",
                             fontFamily = firasans,
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.White
                         )
@@ -321,7 +319,7 @@ fun SignIn(navController: NavController) {
                             Text(
                                 text = "Sign Up",
                                 fontFamily = firasans,
-                                style = MaterialTheme.typography.bodyLarge,
+                                style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFFAB90FA)
                             )
@@ -334,7 +332,7 @@ fun SignIn(navController: NavController) {
                         Text(
                             text = "Forgot Password",
                             fontFamily = firasans,
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFFAB90FA)
                         )
