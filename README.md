@@ -24,12 +24,24 @@ View attendee list, edit event info, send updates, or cancel events.
 ## 🛠️ Built With
 - Kotlin & Jetpack Compose – Modern UI toolkit
 - ViewModel + LiveData / Flow – MVVM architecture
-- Room – Local SQLite database
+- Supabase - As Backend database
 - Hilt - dependency injection
 - WorkManager – Scheduling notifications
 - Navigation Component – Screen navigation
 - Coil – Image loading
 - Material3 – UI theming & components
+
+## 🧰 Tech Stack & Tools
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Kotlin-7F52FF?logo=kotlin&logoColor=white&style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Jetpack%20Compose-4285F4?logo=android&logoColor=white&style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Material--3-6200EE?logo=material-design&logoColor=white&style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Hilt-D0C4DF?logo=dagger&logoColor=white&style=for-the-badge"/>>
+  <img src="https://img.shields.io/badge/MVVM-Architecture-26A69A?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white&style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Android%20Studio-3DDC84?logo=android-studio&logoColor=white&style=for-the-badge"/>
+</p>
 
 ## 📸 Screenshots
 <p align="center">
