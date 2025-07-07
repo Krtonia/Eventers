@@ -1,4 +1,4 @@
-![Eventers Banner](.github/assets/Eventers_banner.png)
+![Eventers Banner](.github/assets/Eventers_banner.webp)
 
 ## Overview
 
@@ -6,19 +6,19 @@
 
 ## Key Features
 
-Create & Edit Events
+- Create & Edit Events
 Add title, description, date/time, location, cover image, category, capacity, and ticket pricing.
 
-Browse & Discover
+- Browse & Discover
 View upcoming events in a clean, scrollable list or calendar view with category filters and search.
 
-Event Details
+- Event Details
 Discover detailed info, RSVP, ticket availability, organizer contacts, and share events seamlessly.
 
-Notifications (WIP)
+- Notifications (WIP)
 Get reminders before an event starts, with customizable preferences.
 
-Organizer Dashboard (WIP)
+- Organizer Dashboard (WIP)
 View attendee list, edit event info, send updates, or cancel events.
 
 ## 🛠️ Built With
@@ -30,6 +30,16 @@ View attendee list, edit event info, send updates, or cancel events.
 - Navigation Component – Screen navigation
 - Coil – Image loading
 - Material3 – UI theming & components
+
+## 📸 Screenshots
+<p align="center">
+  <img src=".github/assets/sigin.webp" width="200"/>
+  <img src=".github/assets/home.webp" width="200"/>
+  <img src=".github/assets/details.webp" width="200"/>
+  <img src=".github/assets/event.webp" width="200"/>
+  <img src=".github/assets/options.webp" width="200"/>
+  <img src=".github/assets/profile.webp" width="200"/>
+</p>
 
 ## 🚀 Getting Started
 

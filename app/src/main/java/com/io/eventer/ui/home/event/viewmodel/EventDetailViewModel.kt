@@ -81,7 +81,7 @@ class EventDetailViewModel @Inject constructor(
         }
     }
 
-    fun updateEvent(eventId: String, title: String, description: String, summary: String, location: String) {
+    fun updateEvent(eventId: String, title: String, description: String, location: String, summary: String) {
         viewModelScope.launch {
             _eventState.update { it.copy(isLoading = true) }
             try {
